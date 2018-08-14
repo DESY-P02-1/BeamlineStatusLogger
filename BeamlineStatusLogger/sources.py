@@ -1,6 +1,7 @@
 import PyTango as tango
 from concurrent import futures
 
+
 class MissingDataException(Exception):
     """Can be used to indicate a reason for a missing value in a Data object.
     """
