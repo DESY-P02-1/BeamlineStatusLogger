@@ -7,13 +7,15 @@ node {
     }
         
     stage('test') {
-        pythonImage.inside("--hostname tango-test") {
-            sh 'python3 -m flake8'
-            try {
-                sh 'python3 -m pytest --junitxml=build/results.xml'
-            }
-            finally {
-                junit 'build/results.xml'
+        pythonImage.withRun("--hostname tango-test") { c ->
+            pythonImage.inside("--link ${c.id}:tango-test") {  
+                sh 'python3 -m flake8'
+                try {
+                    sh 'python3 -m pytest --junitxml=build/results.xml'
+                }
+                finally {
+                    junit 'build/results.xml'
+                }
             }
         }
     }
