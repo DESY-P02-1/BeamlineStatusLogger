@@ -38,7 +38,7 @@ RUN apt-get -y install python3-pytango
 
 
 # Install additional dependencies for package testing
-RUN apt-get -y install python3-pip python3-pytest
+RUN apt-get -y install python3-pip python3-pytest python3-flake8
 
 
 # more info at https://docs.docker.com/config/containers/multi-service_container/
