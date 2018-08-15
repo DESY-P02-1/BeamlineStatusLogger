@@ -7,6 +7,7 @@ setup(name="BeamlineStatusLogger",
       author_email="tim.schoof@desy.de",
       packages=["BeamlineStatusLogger", "tests"],
       install_requires=[
-          'PyTango',  # PyTango takes very long to install by pip
+          "PyTango",  # PyTango takes very long to install by pip
+          "influxdb"
       ],
       )
