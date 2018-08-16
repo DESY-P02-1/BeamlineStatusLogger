@@ -31,7 +31,7 @@ class InfluxDBSink:
         return {
             "measurement": self.measurement,
             # TODO: handle time zones
-            "time": int(data.timestamp.timestamp()*1e9),
+            "time": data.timestamp,
             "fields": fields,
             "tags": data.metadata
         }

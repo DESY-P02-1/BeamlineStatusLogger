@@ -68,7 +68,7 @@ class TestInfluxDBSink:
         data = Data(time, 1, metadata={"id": 1234})
         res = influx_sink._format(data)
         assert res["measurement"] == influx_sink.measurement
-        assert res["time"] == 1534347459660509952
+        assert res["time"] == time
         assert res["tags"]["id"] == 1234
         assert res["fields"]["value"] == 1
 
@@ -77,7 +77,7 @@ class TestInfluxDBSink:
         data = Data(time, {"value1": 1, "value2": 2}, metadata={"id": 1234})
         res = influx_sink._format(data)
         assert res["measurement"] == influx_sink.measurement
-        assert res["time"] == 1534347459660509952
+        assert res["time"] == time
         assert res["tags"]["id"] == 1234
         assert res["fields"]["value1"] == 1
         assert res["fields"]["value2"] == 2
@@ -88,7 +88,7 @@ class TestInfluxDBSink:
                     metadata={"id": 1234})
         res = influx_sink._format(data)
         assert res["measurement"] == influx_sink.measurement
-        assert res["time"] == 1534347459660509952
+        assert res["time"] == time
         assert res["tags"]["id"] == 1234
         assert res["fields"]["error"] == "msg"
 
@@ -100,6 +100,6 @@ class TestInfluxDBSink:
                                   influx_sink.measurement)
         rows = list(res[None])
         assert len(rows) == 1
-        assert rows[0]["time"] == '2018-08-15T15:37:39.660509952Z'
+        assert rows[0]["time"] == '2018-08-15T17:37:39.660509952Z'
         assert rows[0]["value"] == 1
         assert rows[0]["id"] == "1234"
