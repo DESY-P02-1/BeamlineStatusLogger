@@ -18,7 +18,7 @@ node {
                 pythonImage.withRun("--hostname tango-test") { c2 ->
                     pythonImage.inside("--link ${c2.id}:tango-test --link ${c1.id}:influxdb-test") {
                         try {
-                            sh 'python3 -m pytest --junitxml=build/results.xml'
+                            sh 'sleep 3 && python3 -m pytest --junitxml=build/results.xml'
                         }
                         finally {
                             junit 'build/results.xml'
