@@ -1,15 +1,15 @@
 FROM debian:stretch
 
 # Adapted from reszelaz/sardana-test for installing a minimal tango setup following
-# http://tango-controls.readthedocs.io/en/latest/installation/tango-on-linux.html#debian-ubuntu 
+# http://tango-controls.readthedocs.io/en/latest/installation/tango-on-linux.html#debian-ubuntu
 # The container must be started with --hostname tango-test
 
 
 RUN apt-get update
 
 
-# change installation dialogs policy to noninteractive 
-# otherwise debconf raises errors: unable to initialize frontend: Dialog 
+# change installation dialogs policy to noninteractive
+# otherwise debconf raises errors: unable to initialize frontend: Dialog
 ENV DEBIAN_FRONTEND noninteractive
 
 
@@ -23,7 +23,7 @@ RUN ln -s /tmp/mysqld.sock /var/run/mysqld/mysqld.sock
 RUN ln -s /tmp/mysqld.pid /var/run/mysqld/mysqld.pid
 
 
-# install tango-db 
+# install tango-db
 RUN echo 'tango-common tango-common/tango-host string tango-test:10000' | debconf-set-selections \
     && echo 'tango-db tango-db/dbconfig-install boolean false' | debconf-set-selections \
     && apt-get install -y tango-db
@@ -44,7 +44,7 @@ RUN pip3 install influxdb
 
 
 # more info at https://docs.docker.com/config/containers/multi-service_container/
-# install and configure supervisor 
+# install and configure supervisor
 RUN apt-get install -y supervisor
 RUN mkdir -p /var/log/supervisor
 
