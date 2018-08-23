@@ -38,14 +38,17 @@ class TangoDeviceAttributeSource:
         Name of the device
     attribute_name :
         Name of the attribute
+    metadata : dict_like
+        The metadata is added to every returned data object
     """
-    def __init__(self, device_name, attribute_name):
+    def __init__(self, device_name, attribute_name, metadata={}):
         self.device_name = device_name
         self.attribute_name = attribute_name
         # TODO: Should a possible exception be wrapped?
         self.device = tango.DeviceProxy(device_name)
         # Test if attribute exists
         self.device.attribute_query(attribute_name)
+        self.metadata = metadata
 
     def read(self):
         try:
@@ -55,6 +58,6 @@ class TangoDeviceAttributeSource:
             # TODO: Check if this is close enough to the would be time of
             #       a successful read
             timestamp = tango.TimeVal.todatetime(tango.TimeVal.now())
-            return Data(timestamp, None, err)
+            return Data(timestamp, None, err, metadata=self.metadata)
         timestamp = tango.TimeVal.todatetime(device_attribute.get_date())
-        return Data(timestamp, device_attribute.value)
+        return Data(timestamp, device_attribute.value, metadata=self.metadata)

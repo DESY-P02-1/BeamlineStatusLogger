@@ -1,7 +1,6 @@
 from BeamlineStatusLogger.sources import TangoDeviceAttributeSource
 import PyTango as tango
 import datetime
-import collections
 import pytest
 
 
@@ -15,6 +14,7 @@ class TestTangoDeviceAttributeSource:
         s = TangoDeviceAttributeSource(device_name, attribute_name)
         assert s.device_name == device_name
         assert s.attribute_name == attribute_name
+        assert s.metadata == {}
 
     def test_init_wrong_device(self):
         device_name = "sys/tg_test/2"
@@ -32,18 +32,20 @@ class TestTangoDeviceAttributeSource:
         device_name = "sys/tg_test/1"
         attribute_name = "float_scalar"
         maxdelta = datetime.timedelta(seconds=5)
-        s = TangoDeviceAttributeSource(device_name, attribute_name)
+        s = TangoDeviceAttributeSource(device_name, attribute_name,
+                                       metadata={"attribute": attribute_name})
         data = s.read()
         assert data.timestamp - datetime.datetime.now() < maxdelta
         assert data.failure is None
         assert data.value == 0
-        assert isinstance(data.metadata, collections.abc.Mapping)
+        assert data.metadata == {"attribute": attribute_name}
 
     def test_read_failure(self, monkeypatch):
         device_name = "sys/tg_test/1"
         attribute_name = "float_scalar"
         maxdelta = datetime.timedelta(seconds=5)
-        s = TangoDeviceAttributeSource(device_name, attribute_name)
+        s = TangoDeviceAttributeSource(device_name, attribute_name,
+                                       metadata={"attribute": attribute_name})
         ex = tango.DevFailed()
 
         # TODO: How to test handling of tango exceptions?
@@ -55,4 +57,4 @@ class TestTangoDeviceAttributeSource:
         assert data.timestamp - datetime.datetime.now() < maxdelta
         assert data.failure is ex
         assert data.value is None
-        assert isinstance(data.metadata, collections.abc.Mapping)
+        assert data.metadata == {"attribute": attribute_name}

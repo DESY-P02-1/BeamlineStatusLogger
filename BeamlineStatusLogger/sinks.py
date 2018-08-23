@@ -8,9 +8,11 @@ class InfluxDBSink:
                  host=os.environ.get("INFLUXDB_HOST", "localhost"),
                  port=os.environ.get("INFLUXDB_PORT", "8086"),
                  create_db=False,
+                 metadata={},
                  **kwargs):
         self.client = InfluxDBClient(host, port, database=database, **kwargs)
         self.measurement = measurement
+        self.metadata = metadata
         if create_db:
             self.client.create_database(database)
         else:
@@ -28,10 +30,12 @@ class InfluxDBSink:
             fields = data.value
         else:
             fields = {"value": data.value}
+        tags = data.metadata
+        tags.update(self.metadata)
         return {
             "measurement": self.measurement,
             # TODO: handle time zones
             "time": data.timestamp,
             "fields": fields,
-            "tags": data.metadata
+            "tags": tags
         }

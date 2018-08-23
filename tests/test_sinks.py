@@ -38,7 +38,7 @@ def influxdb(influx_client, new_db_name):
 def influx_sink(influxdb):
     database = influxdb
     measurement = "dummy"
-    return InfluxDBSink(database, measurement)
+    return InfluxDBSink(database, measurement, metadata={"id": 1234})
 
 
 class TestInfluxDBSink:
@@ -48,6 +48,7 @@ class TestInfluxDBSink:
         sink = InfluxDBSink(database, measurement)
         assert sink.measurement == measurement
         assert sink.client
+        assert sink.metadata == {}
 
     def test_init_create_db_succes(self, influx_client, new_db_name):
         database = new_db_name
@@ -65,36 +66,40 @@ class TestInfluxDBSink:
 
     def test_format_number(self, influx_sink):
         time = datetime(2018, 8, 15, 17, 37, 39, 660510)
-        data = Data(time, 1, metadata={"id": 1234})
+        data = Data(time, 1, metadata={"attribute": "postition"})
         res = influx_sink._format(data)
         assert res["measurement"] == influx_sink.measurement
         assert res["time"] == time
         assert res["tags"]["id"] == 1234
+        assert res["tags"]["attribute"] == "postition"
         assert res["fields"]["value"] == 1
 
     def test_format_dict(self, influx_sink):
         time = datetime(2018, 8, 15, 17, 37, 39, 660510)
-        data = Data(time, {"value1": 1, "value2": 2}, metadata={"id": 1234})
+        data = Data(time, {"value1": 1, "value2": 2},
+                    metadata={"attribute": "postition"})
         res = influx_sink._format(data)
         assert res["measurement"] == influx_sink.measurement
         assert res["time"] == time
         assert res["tags"]["id"] == 1234
+        assert res["tags"]["attribute"] == "postition"
         assert res["fields"]["value1"] == 1
         assert res["fields"]["value2"] == 2
 
     def test_format_error(self, influx_sink):
         time = datetime(2018, 8, 15, 17, 37, 39, 660510)
         data = Data(time, None, failure=Exception("msg"),
-                    metadata={"id": 1234})
+                    metadata={"attribute": "postition"})
         res = influx_sink._format(data)
         assert res["measurement"] == influx_sink.measurement
         assert res["time"] == time
         assert res["tags"]["id"] == 1234
+        assert res["tags"]["attribute"] == "postition"
         assert res["fields"]["error"] == "msg"
 
     def test_write(self, influx_client, influx_sink):
         time = datetime(2018, 8, 15, 17, 37, 39, 660510)
-        data = Data(time, 1, metadata={"id": 1234})
+        data = Data(time, 1, metadata={"attribute": "postition"})
         influx_sink.write(data)
         res = influx_client.query("SELECT * FROM " +
                                   influx_sink.measurement)
@@ -103,3 +108,4 @@ class TestInfluxDBSink:
         assert rows[0]["time"] == '2018-08-15T17:37:39.660509952Z'
         assert rows[0]["value"] == 1
         assert rows[0]["id"] == "1234"
+        assert rows[0]["attribute"] == "postition"
