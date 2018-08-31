@@ -12,4 +12,5 @@ setup(name="BeamlineStatusLogger",
           "scipy",
           "skimage"
       ],
+      scripts=["bin/beam_parameter_logger"],
       )

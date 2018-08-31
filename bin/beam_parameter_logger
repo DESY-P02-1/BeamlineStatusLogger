@@ -1,0 +1,52 @@
+#!/usr/bin/env python3
+from BeamlineStatusLogger.sources import TangoDeviceAttributeSource
+from BeamlineStatusLogger.processors import PeakFitter, pass_failures
+from BeamlineStatusLogger.sinks import InfluxDBSink
+from BeamlineStatusLogger.logger import Logger
+from BeamlineStatusLogger.timer import SynchronizedPeriodicTimer
+from numpy import float64
+import argparse
+
+
+parser = argparse.ArgumentParser(description="Log beam parameters from" +
+                                 " Tango camera images.")
+parser.add_argument("--device", "-d", type=str,
+                    help='The Tango device name')
+parser.add_argument("--attribute", "-a", type=str, default="frame",
+                    help="The Tango attribute name")
+parser.add_argument("--database", "-D", type=str,
+                    help="The influxdb database name")
+parser.add_argument("--measurement", "-m", type=str, default="beam_parameters",
+                    help="The influxdb measurement name")
+
+args = parser.parse_args()
+
+database = args.database
+measurement = args.measurement
+device = args.device
+attribute = args.attribute
+
+
+source = TangoDeviceAttributeSource(device,
+                                    attribute,
+                                    {"device": device})
+
+
+@pass_failures
+def convert_to_float(data):
+    try:
+        data.value[attribute] = data.value[attribute].astype(float64)
+    except AttributeError:
+        pass
+    return data
+
+
+fit_peak = PeakFitter(attribute)
+
+sink = InfluxDBSink(database, measurement, create_db=True)
+
+timer = SynchronizedPeriodicTimer(5)
+
+logger = Logger(source, [convert_to_float, fit_peak], sink, timer)
+
+logger.run()
