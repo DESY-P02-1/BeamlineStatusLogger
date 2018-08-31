@@ -10,7 +10,7 @@ setup(name="BeamlineStatusLogger",
           "PyTango",  # PyTango takes very long to install by pip
           "influxdb",
           "scipy",
-          "skimage"
+          "scikit-image"
       ],
       scripts=["bin/beam_parameter_logger"],
       )
