@@ -3,6 +3,10 @@ from collections.abc import Mapping
 import os
 
 
+def filter_nones(dic):
+    return {key: value for key, value in dic.items() if value is not None}
+
+
 class InfluxDBSink:
     def __init__(self, database, measurement,
                  host=os.environ.get("INFLUXDB_HOST", "localhost"),
@@ -21,7 +25,11 @@ class InfluxDBSink:
                 raise ValueError("Database " + database + " does not exist")
 
     def write(self, data):
-        self.client.write_points([self._format(data)])
+        point = self._format(data)
+        if point["fields"]:
+            return self.client.write_points([point])
+        else:
+            return False
 
     def _format(self, data):
         if data.failure:
@@ -30,6 +38,7 @@ class InfluxDBSink:
             fields = data.value
         else:
             fields = {"value": data.value}
+        fields = filter_nones(fields)
         tags = data.metadata
         tags.update(self.metadata)
         return {

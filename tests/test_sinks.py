@@ -1,9 +1,17 @@
-from BeamlineStatusLogger.sinks import InfluxDBSink
+from BeamlineStatusLogger.sinks import InfluxDBSink, filter_nones
 from BeamlineStatusLogger.sources import Data
 from influxdb import InfluxDBClient
 from datetime import datetime
 import pytest
 import os
+
+
+def test_filter_nones():
+    d = {"a": 1, "b": "foo", "c": None,
+         "d": {"a": 2, "b": None, "c": "None"}}
+    res = filter_nones(d)
+    assert res == {"a": 1, "b": "foo",
+                   "d": {"a": 2, "b": None, "c": "None"}}
 
 
 @pytest.fixture
@@ -76,7 +84,7 @@ class TestInfluxDBSink:
 
     def test_format_dict(self, influx_sink):
         time = datetime(2018, 8, 15, 17, 37, 39, 660510)
-        data = Data(time, {"value1": 1, "value2": 2},
+        data = Data(time, {"value1": 1, "value2": 2, "value": None},
                     metadata={"attribute": "postition"})
         res = influx_sink._format(data)
         assert res["measurement"] == influx_sink.measurement
@@ -85,6 +93,7 @@ class TestInfluxDBSink:
         assert res["tags"]["attribute"] == "postition"
         assert res["fields"]["value1"] == 1
         assert res["fields"]["value2"] == 2
+        assert "value3" not in res["fields"]
 
     def test_format_error(self, influx_sink):
         time = datetime(2018, 8, 15, 17, 37, 39, 660510)
@@ -103,9 +112,21 @@ class TestInfluxDBSink:
         influx_sink.write(data)
         res = influx_client.query("SELECT * FROM " +
                                   influx_sink.measurement)
-        rows = list(res[None])
+        rows = list(res.get_points())
         assert len(rows) == 1
         assert rows[0]["time"] == '2018-08-15T17:37:39.660509952Z'
         assert rows[0]["value"] == 1
         assert rows[0]["id"] == "1234"
         assert rows[0]["attribute"] == "postition"
+
+    def test_write_none(self, influx_client, influx_sink):
+        time = datetime(2018, 8, 15, 17, 37, 39, 660510)
+        data = Data(time, None, metadata={"attribute": "postition"})
+        influx_sink.write(data)
+        data2 = Data(time, {"value": None},
+                     metadata={"attribute": "postition"})
+        influx_sink.write(data2)
+        res = influx_client.query("SELECT * FROM " +
+                                  influx_sink.measurement)
+        rows = list(res.get_points())
+        assert not rows

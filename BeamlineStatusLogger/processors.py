@@ -58,6 +58,9 @@ class PeakFitter:
         else:
             img = data.value
 
+        if img is None:
+            return data
+
         try:
             p_fit = utils.get_peak_parameters(img)
         except utils.FittingError:
