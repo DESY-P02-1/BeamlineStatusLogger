@@ -9,6 +9,7 @@ setup(name="BeamlineStatusLogger",
       install_requires=[
           "PyTango",  # PyTango takes very long to install by pip
           "influxdb",
-          "scipy"
+          "scipy",
+          "skimage"
       ],
       )
