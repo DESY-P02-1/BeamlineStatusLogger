@@ -60,4 +60,6 @@ class TangoDeviceAttributeSource:
             timestamp = tango.TimeVal.todatetime(tango.TimeVal.now())
             return Data(timestamp, None, err, metadata=self.metadata)
         timestamp = tango.TimeVal.todatetime(device_attribute.get_date())
-        return Data(timestamp, device_attribute.value, metadata=self.metadata)
+        value = {self.attribute_name: device_attribute.value,
+                 "quality": str(device_attribute.quality)}
+        return Data(timestamp, value, metadata=self.metadata)

@@ -37,7 +37,7 @@ class TestTangoDeviceAttributeSource:
         data = s.read()
         assert data.timestamp - datetime.datetime.now() < maxdelta
         assert data.failure is None
-        assert data.value == 0
+        assert data.value[attribute_name] == 0
         assert data.metadata == {"attribute": attribute_name}
 
     def test_read_failure(self, monkeypatch):

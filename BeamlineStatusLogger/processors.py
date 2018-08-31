@@ -48,9 +48,15 @@ class PeakFitter:
         cutoff : float
             The maximum value of the peak
     """
+    def __init__(self, key=None):
+        self.key = key
+
     @pass_failures
     def __call__(self, data):
-        img = data.value
+        if self.key:
+            img = data.value.pop(self.key)
+        else:
+            img = data.value
 
         try:
             p_fit = utils.get_peak_parameters(img)
@@ -72,6 +78,9 @@ class PeakFitter:
         else:
             d = {"beam_on": False}
 
-        data.value = d
+        if self.key:
+            data.value.update(d)
+        else:
+            data.value = d
 
         return data
