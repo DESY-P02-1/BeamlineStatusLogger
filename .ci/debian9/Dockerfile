@@ -38,7 +38,7 @@ RUN apt-get -y install python3-pytango
 
 
 # Install additional dependencies for package testing
-RUN apt-get -y install procps python3-pip python3-pytest python3-flake8
+RUN apt-get -y install procps python3-pip python3-pytest python3-flake8 python3-scipy
 
 RUN pip3 install influxdb
 
