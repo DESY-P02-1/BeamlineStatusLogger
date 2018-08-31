@@ -35,3 +35,14 @@ class TestPeakFitter:
         assert proc_data.value["amplitude"] == 1
         assert proc_data.value["cutoff"] == 7
         assert proc_data.metadata["id"] == 1234
+
+    def test_peak_fitter_failure(self):
+        ex = Exception("An error occured")
+        data = Data(datetime(2018, 8, 28), None, failure=ex,
+                    metadata={"id": 1234})
+        pf = PeakFitter()
+        proc_data = pf(data)
+        assert proc_data.timestamp == data.timestamp
+        assert proc_data.value is None
+        assert proc_data.failure is ex
+        assert proc_data.metadata["id"] == 1234

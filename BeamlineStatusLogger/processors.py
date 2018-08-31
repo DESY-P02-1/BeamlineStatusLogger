@@ -1,4 +1,27 @@
 import BeamlineStatusLogger.utils as utils
+import functools
+
+
+def pass_failures(func):
+    @functools.wraps(func)
+    def wrapper(*args):
+        if len(args) == 2:
+            # wraps class method
+            self, data = args
+        elif len(args) == 1:
+            # wraps function
+            data, = args
+        else:
+            raise ValueError("Wrong number of argumuments, got " + str(args))
+
+        if data.failure:
+            # just pass the data object
+            return data
+        else:
+            # call the processor function
+            return func(*args)
+
+    return wrapper
 
 
 class PeakFitter:
@@ -25,6 +48,7 @@ class PeakFitter:
         cutoff : float
             The maximum value of the peak
     """
+    @pass_failures
     def __call__(self, data):
         img = data.value
 
