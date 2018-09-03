@@ -27,7 +27,9 @@ class InfluxDBSink:
     def write(self, data):
         point = self._format(data)
         if point["fields"]:
-            return self.client.write_points([point])
+            success = self.client.write_points([point])
+            success = success and data.failure is None
+            return success
         else:
             return False
 

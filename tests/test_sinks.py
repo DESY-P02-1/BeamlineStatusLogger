@@ -111,7 +111,8 @@ class TestInfluxDBSink:
         time = datetime(2018, 8, 15, 17, 37, 39, 660510)
         time = timezone("Europe/Berlin").localize(time)
         data = Data(time, 1, metadata={"attribute": "postition"})
-        influx_sink.write(data)
+        success = influx_sink.write(data)
+        assert success
         res = influx_client.query("SELECT * FROM " +
                                   influx_sink.measurement)
         rows = list(res.get_points())
@@ -124,11 +125,26 @@ class TestInfluxDBSink:
     def test_write_none(self, influx_client, influx_sink):
         time = datetime(2018, 8, 15, 17, 37, 39, 660510)
         data = Data(time, None, metadata={"attribute": "postition"})
-        influx_sink.write(data)
+        success = influx_sink.write(data)
+        assert not success
         data2 = Data(time, {"value": None},
                      metadata={"attribute": "postition"})
-        influx_sink.write(data2)
+        success = influx_sink.write(data2)
+        assert not success
         res = influx_client.query("SELECT * FROM " +
                                   influx_sink.measurement)
         rows = list(res.get_points())
         assert not rows
+
+    def test_write_failure(self, influx_client, influx_sink):
+        time = datetime(2018, 8, 15, 17, 37, 39, 660510)
+        data = Data(time, None, failure=Exception("msg"),
+                    metadata={"attribute": "postition"})
+        success = influx_sink.write(data)
+        assert not success
+        res = influx_client.query("SELECT * FROM " +
+                                  influx_sink.measurement)
+        rows = list(res.get_points())
+        assert len(rows) == 1
+        assert rows[0]["time"] == '2018-08-15T17:37:39.660509952Z'
+        assert rows[0]["error"] == "msg"
