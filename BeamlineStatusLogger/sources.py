@@ -1,5 +1,6 @@
 import PyTango as tango
 from concurrent import futures
+from pytz import timezone
 
 
 class MissingDataException(Exception):
@@ -41,7 +42,7 @@ class TangoDeviceAttributeSource:
     metadata : dict_like
         The metadata is added to every returned data object
     """
-    def __init__(self, device_name, attribute_name, metadata={}):
+    def __init__(self, device_name, attribute_name, metadata={}, tz=None):
         self.device_name = device_name
         self.attribute_name = attribute_name
         # TODO: Should a possible exception be wrapped?
@@ -49,6 +50,10 @@ class TangoDeviceAttributeSource:
         # Test if attribute exists
         self.device.attribute_query(attribute_name)
         self.metadata = metadata
+        if tz:
+            self.localtz = tz
+        else:
+            self.localtz = timezone('Europe/Berlin')
 
     def read(self):
         try:
@@ -58,8 +63,10 @@ class TangoDeviceAttributeSource:
             # TODO: Check if this is close enough to the would be time of
             #       a successful read
             timestamp = tango.TimeVal.todatetime(tango.TimeVal.now())
+            timestamp = self.localtz.localize(timestamp)
             return Data(timestamp, None, err, metadata=self.metadata)
         timestamp = tango.TimeVal.todatetime(device_attribute.get_date())
+        timestamp = self.localtz.localize(timestamp)
         value = {self.attribute_name: device_attribute.value,
                  "quality": str(device_attribute.quality)}
         return Data(timestamp, value, metadata=self.metadata)

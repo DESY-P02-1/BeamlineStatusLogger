@@ -2,6 +2,7 @@ from BeamlineStatusLogger.sinks import InfluxDBSink, filter_nones
 from BeamlineStatusLogger.sources import Data
 from influxdb import InfluxDBClient
 from datetime import datetime
+from pytz import timezone
 import pytest
 import os
 
@@ -108,13 +109,14 @@ class TestInfluxDBSink:
 
     def test_write(self, influx_client, influx_sink):
         time = datetime(2018, 8, 15, 17, 37, 39, 660510)
+        time = timezone("Europe/Berlin").localize(time)
         data = Data(time, 1, metadata={"attribute": "postition"})
         influx_sink.write(data)
         res = influx_client.query("SELECT * FROM " +
                                   influx_sink.measurement)
         rows = list(res.get_points())
         assert len(rows) == 1
-        assert rows[0]["time"] == '2018-08-15T17:37:39.660509952Z'
+        assert rows[0]["time"] == '2018-08-15T15:37:39.660509952Z'
         assert rows[0]["value"] == 1
         assert rows[0]["id"] == "1234"
         assert rows[0]["attribute"] == "postition"

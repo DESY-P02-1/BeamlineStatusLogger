@@ -1,6 +1,7 @@
 from BeamlineStatusLogger.sources import TangoDeviceAttributeSource
 import PyTango as tango
 import datetime
+from pytz import timezone
 import pytest
 
 
@@ -35,7 +36,9 @@ class TestTangoDeviceAttributeSource:
         s = TangoDeviceAttributeSource(device_name, attribute_name,
                                        metadata={"attribute": attribute_name})
         data = s.read()
-        assert data.timestamp - datetime.datetime.now() < maxdelta
+        now = datetime.datetime.now()
+        now = timezone("Europe/Berlin").localize(now)
+        assert data.timestamp - now < maxdelta
         assert data.failure is None
         assert data.value[attribute_name] == 0
         assert data.metadata == {"attribute": attribute_name}
@@ -54,7 +57,9 @@ class TestTangoDeviceAttributeSource:
         monkeypatch.setattr(s.device, 'read_attribute', mockreturn)
 
         data = s.read()
-        assert data.timestamp - datetime.datetime.now() < maxdelta
+        now = datetime.datetime.now()
+        now = timezone("Europe/Berlin").localize(now)
+        assert data.timestamp - now < maxdelta
         assert data.failure is ex
         assert data.value is None
         assert data.metadata == {"attribute": attribute_name}
