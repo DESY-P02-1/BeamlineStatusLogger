@@ -1,4 +1,5 @@
-from time import sleep, time
+from time import time
+from threading import Event
 
 
 class SynchronizedPeriodicTimer:
@@ -46,8 +47,23 @@ class SynchronizedPeriodicTimer:
                              " and max = " + str(p_max))
         self.fail_tol = fail_tol
         self.fail_count = 0
+        self.event = Event()
 
     def __call__(self, success=True):
+        """
+            Wait until the end of a period.
+
+            Parameters
+            ----------
+            success : Boolean, optional
+                When this is False `fail_count` consecutive times, the timer
+                will start slow down until True is recieved
+
+            Returns
+            -------
+            Boolean
+                True, if the timer executed normally. False, if it was aborted
+        """
         if success:
             self.fail_count = 0
             self.period = self.p_min
@@ -57,9 +73,16 @@ class SynchronizedPeriodicTimer:
             if self.fail_count > self.fail_tol and self.period*2 <= self.p_max:
                 self.period = self.period*2
             self._sleep()
+        return not self.event.is_set()
+
+    def abort(self):
+        """
+            Abort the timer execution
+        """
+        self.event.set()
 
     def _sleep(self):
-        sleep(self.period - (time() - self.offset) % self.p_min)
+        self.event.wait(self.period - (time() - self.offset) % self.p_min)
 
 
 def PeriodicTimer(period, p_max=None, fail_tol=3):
