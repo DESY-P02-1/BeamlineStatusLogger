@@ -130,7 +130,7 @@ def improve_img(img):
     return img
 
 
-def find_treshold(img, background=0):
+def find_threshold(img, background=0):
     # without bright pixels, max should not be too far from the peak value
     max_val = img.max()
 
@@ -352,7 +352,7 @@ def get_peak_parameters(img):
     s = estimate_noise(img)
 
     # estimate a threshold
-    thresh = find_treshold(img)
+    thresh = find_threshold(img)
     if thresh < 3*s:
         raise LargeNoiseError("Data too noisy for a reliable fit")
 
@@ -454,7 +454,7 @@ def setup_axes():
     return fig, main_ax, y_slice, x_slice
 
 
-def plot_gauss(img, p, axes=None):
+def plot_gauss(img, p, axes=None, zoom=False):
     if axes is None:
         f, *axes = setup_axes()
     elif len(axes) == 1:
@@ -469,10 +469,26 @@ def plot_gauss(img, p, axes=None):
     fit_img = np.fromfunction(lambda x, y: gauss2d_cut(y, x, *p), img.shape)
 
     a0.grid()
-    a0.imshow(np.abs(img - fit_img))
+    a0.imshow(img)
 
     a0.axvline(x0)
     a0.axhline(y0)
+
+    x1 = x0 + math.cos(rot) * sx
+    y1 = y0 - math.sin(rot) * sx
+    x2 = x0 - math.sin(rot) * sy
+    y2 = y0 - math.cos(rot) * sy
+
+    a0.plot((x0, x1), (y0, y1), '-r', linewidth=2.5)
+    a0.plot((x0, x2), (y0, y2), '-r', linewidth=2.5)
+    a0.plot(x0, y0, '.g', markersize=15)
+
+    angle = -math.degrees(rot)
+
+    a0.add_patch(Ellipse((x0, y0), width=2*sx, height=2*sy, angle=angle,
+                         edgecolor='black',
+                         facecolor='none',
+                         linewidth=2))
 
     if a1:
         a1.grid()
@@ -485,6 +501,14 @@ def plot_gauss(img, p, axes=None):
         y0_index = np.clip(int(y0), 0, img.shape[0] - 1)
         a2.plot(np.arange(img.shape[1]), img[y0_index, :])
         a2.plot(np.arange(img.shape[1]), fit_img[y0_index, :])
+
+    if zoom:
+        width = 8*max(sx, sy)
+        height = 6*max(sx, sy)
+        a0.set_xlim(x0-width, x0+width)
+        a0.set_ylim(y0+height, y0-height)
+        a1.set_ylim(y0+height, y0-height)
+        a2.set_xlim(x0-width, x0+width)
 
     return f, (a0, a1, a2)
 

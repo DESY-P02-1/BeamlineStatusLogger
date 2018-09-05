@@ -18,6 +18,8 @@ parser.add_argument("--database", "-D", type=str,
                     help="The influxdb database name")
 parser.add_argument("--measurement", "-m", type=str, default="beam_parameters",
                     help="The influxdb measurement name")
+parser.add_argument("--log_dir", type=str, default="",
+                    help="A directory for logging frames with large changes")
 
 args = parser.parse_args()
 
@@ -25,6 +27,7 @@ database = args.database
 measurement = args.measurement
 device = args.device
 attribute = args.attribute
+log_dir = args.log_dir
 
 
 source = TangoDeviceAttributeSource(device,
@@ -41,7 +44,7 @@ def convert_to_float(data):
     return data
 
 
-fit_peak = PeakFitter(attribute)
+fit_peak = PeakFitter(attribute, log_dir=log_dir)
 
 sink = InfluxDBSink(database, measurement, create_db=True)
 

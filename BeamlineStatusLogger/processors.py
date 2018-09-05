@@ -1,5 +1,8 @@
 import BeamlineStatusLogger.utils as utils
 import functools
+import os
+import numpy as np
+import matplotlib.pyplot as plt
 
 
 def pass_failures(func):
@@ -48,8 +51,37 @@ class PeakFitter:
         cutoff : float
             The maximum value of the peak
     """
-    def __init__(self, key=None):
+    def __init__(self, key=None, log_dir=None, log_thresh=1):
+        """
+            Construct a PeakFitter processor instance
+
+            Parameters
+            ----------
+            key : str
+                The key to extract the image from the data.value dict
+            log_dir : str, optional
+                If given, images will be saved to this directory whenever the
+                position or width of the peak changes by more than `log_thresh`
+                pixels. The directory must exist
+            log_thresh : number, optional
+                Threshold for logging peak movements. Only has an effect if
+                `log_dir` is given.
+        """
         self.key = key
+        self.log_dir = log_dir
+        self.log_thresh = log_thresh
+        self.last_h = None
+        self.last_a = None
+        self.last_x0 = None
+        self.last_y0 = None
+        self.last_sx = None
+        self.last_sy = None
+        self.last_theta = None
+        self.last_cutoff = None
+
+        if self.log_dir:
+            if not os.path.isdir(self.log_dir):
+                raise ValueError(self.log_dir + " is not a directory")
 
     @pass_failures
     def __call__(self, data):
@@ -67,6 +99,7 @@ class PeakFitter:
             p_fit = None
 
         if p_fit:
+            self.log_frames(data.timestamp, img, p_fit)
             h, a, x0, y0, sx, sy, theta, cutoff = p_fit
             d = {"beam_on": True,
                  "mu_x": x0,
@@ -87,3 +120,27 @@ class PeakFitter:
             data.value = d
 
         return data
+
+    def log_frames(self, time, img, p):
+        if self.log_dir:
+            h, a, x0, y0, sx, sy, theta, cutoff = p
+            if ((self.last_x0 and abs(x0 - self.last_x0) > self.log_thresh) or
+               (self.last_y0 and abs(y0 - self.last_y0) > self.log_thresh) or
+               (self.last_sx and abs(sx - self.last_sx) > self.log_thresh) or
+               (self.last_sy and abs(sy - self.last_sy) > self.log_thresh)):
+                filename = os.path.join(self.log_dir,
+                                        "img_" + time.isoformat())
+                np.save(filename, img)
+                utils.plot_gauss(img, p)
+                plt.savefig(filename + ".png")
+                utils.plot_gauss(img, p, zoom=True)
+                plt.savefig(filename + "_zoomed.png")
+
+            self.last_h = h
+            self.last_a = a
+            self.last_x0 = x0
+            self.last_y0 = y0
+            self.last_sx = sx
+            self.last_sy = sy
+            self.last_theta = theta
+            self.last_cutoff = cutoff
