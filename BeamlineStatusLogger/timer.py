@@ -81,6 +81,14 @@ class SynchronizedPeriodicTimer:
         """
         self.event.set()
 
+    def reset(self):
+        """
+            Reset the timer to its initial state
+        """
+        self.event.clear()
+        self.fail_count = 0
+        self.period = self.p_min
+
     def _sleep(self):
         self.event.wait(self.period - (time() - self.offset) % self.p_min)
 

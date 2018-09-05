@@ -1,6 +1,7 @@
 from BeamlineStatusLogger.timer import SynchronizedPeriodicTimer
 from BeamlineStatusLogger.timer import PeriodicTimer
 import BeamlineStatusLogger.timer as timer
+import random
 import pytest
 from pytest import approx
 
@@ -26,6 +27,10 @@ class MockEvent:
 
     def is_set(self):
         return self._set
+
+    def clear(self):
+        self.arg = None
+        self._set = False
 
 
 @pytest.fixture
@@ -117,6 +122,33 @@ class TestSynchronizedPeriodicTimer:
         ret = t()
         assert not ret
         assert mockEvent.arg == 1
+
+    @pytest.mark.parametrize('repeat', range(10))
+    def test_timer_reset(self, mockTime, mockEvent, repeat):
+        t = SynchronizedPeriodicTimer(5, p_max=2000)
+        input_list = []
+        response_list = []
+        time = mockTime.time
+        # create a random series of calls and save responses
+        for i in range(30):
+            success = random.randint(0, 1)
+            time += random.randint(1, 6)
+            input_list.append((success, time))
+            mockTime.time = time
+            ret = t(success)
+            arg = mockEvent.arg
+            response_list.append((ret, arg))
+
+        if random.randint(0, 1):
+            t.abort()
+
+        t.reset()
+        # replay the same series of call and check that all responses are
+        # the same
+        for (success, time), (ret, arg) in zip(input_list, response_list):
+            mockTime.time = time
+            assert t(success) == ret
+            assert mockEvent.arg == arg
 
 
 class TestPeriodicTimer:
