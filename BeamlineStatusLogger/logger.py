@@ -16,10 +16,13 @@ class Logger:
         self.timer = timer
 
     def run(self):
+        self.timer.reset()
         success = True
-        while True:
-            self.timer(success)
+        while self.timer(success):
             data = self.source.read()
             for proc in self.processors:
                 data = proc(data)
             success = self.sink.write(data)
+
+    def abort(self):
+        self.timer.abort()
