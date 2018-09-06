@@ -93,6 +93,8 @@ class PeakFitter:
         if img is None:
             return data
 
+        img = img.astype(np.float64)
+
         try:
             p_fit = utils.get_peak_parameters(img)
         except utils.FittingError:

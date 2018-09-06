@@ -63,6 +63,23 @@ class TestPeakFitter:
         assert proc_data.value["cutoff"] == 7
         assert proc_data.metadata["id"] == 1234
 
+    def test_peak_fitter_convert_float(self, monkeypatch):
+        dtype = None
+
+        def mockreturn(img):
+                nonlocal dtype
+                dtype = img.dtype
+                return 0, 1, 2, 3, 4, 5, 6, 7
+        monkeypatch.setattr(utils, 'get_peak_parameters', mockreturn)
+
+        data = Data(datetime(2018, 8, 28),
+                    {"frame": np.random.randint(0, 255, (600, 800)),
+                     "quality": 0},
+                    metadata={"id": 1234})
+        pf = PeakFitter("frame")
+        pf(data)
+        assert dtype == np.float64
+
     def test_peak_fitter_failure(self):
         ex = Exception("An error occured")
         data = Data(datetime(2018, 8, 28), None, failure=ex,
