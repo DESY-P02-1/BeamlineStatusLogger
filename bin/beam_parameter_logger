@@ -4,6 +4,7 @@ from BeamlineStatusLogger.processors import PeakFitter
 from BeamlineStatusLogger.sinks import InfluxDBSink
 from BeamlineStatusLogger.logger import Logger
 from BeamlineStatusLogger.timer import SynchronizedPeriodicTimer
+import signal
 import argparse
 
 
@@ -41,5 +42,14 @@ sink = InfluxDBSink(database, measurement, create_db=True)
 timer = SynchronizedPeriodicTimer(5, offset=0.05)
 
 logger = Logger(source, fit_peak, sink, timer)
+
+
+def signalhandler(signum, frame):
+    logger.abort()
+
+
+signal.signal(signal.SIGINT, signalhandler)
+signal.signal(signal.SIGTERM, signalhandler)
+
 
 logger.run()
