@@ -13,5 +13,5 @@ setup(name="BeamlineStatusLogger",
           "scikit-image",
           "pytz"
       ],
-      scripts=["bin/beam_parameter_logger"],
+      scripts=["bin/beam_parameter_logger", "bin/beamline_status_logger"],
       )

@@ -1,0 +1,5 @@
+[based on]
+beam_parameters.base
+
+[source]
+device_name = haspp02ch1:10000/hasylab/p02_lm12/output

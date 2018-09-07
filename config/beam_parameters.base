@@ -1,0 +1,20 @@
+[metadata]
+device = ${source:device_name}
+
+[source]
+class = TangoDeviceAttributeSource
+attribute_name = frame
+
+[processor]
+class = PeakFitter
+key = ${source:attribute_name}
+
+[sink]
+class = InfluxDBSink
+database = test
+measurement = beam_parameters
+
+[timer]
+class = SynchronizedPeriodicTimer
+period = 5
+offset = 0.05
