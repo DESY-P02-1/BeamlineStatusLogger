@@ -18,3 +18,4 @@ measurement = beam_parameters
 class = SynchronizedPeriodicTimer
 period = 5
 offset = 0.05
+p_max = 2560
