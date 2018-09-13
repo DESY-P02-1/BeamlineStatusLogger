@@ -73,7 +73,8 @@ def create_Logger(dictionary):
     pipeline = {}
     if "metadata" in dictionary:
         metadata = dictionary.pop("metadata")
-    dictionary["source"]["metadata"] = metadata
+        dictionary["source"]["metadata"] = metadata
+
     for module, instance in dictionary.items():
         if "class" not in instance:
             raise ConfigError("Section [" + module + "] must contain a class "
