@@ -1,0 +1,16 @@
+Source: python3-beamline-status-logger
+Section: python3
+Priority: optional
+Maintainer: Tim Schoof, <tim.schoof@desy.de>
+Build-Depends: debhelper (>= 11~),
+               dh-python,
+               python3-setuptools,
+               python3 (>= 3.5)
+Standards-Version: 4.1.3
+X-Python3-Version: >= 3.5
+
+Package: python3-beamline-status-logger
+Architecture: all
+Depends: ${python3:Depends}, ${misc:Depends}
+Description: Beamline status logger
+ Log beamline attributes to a database
