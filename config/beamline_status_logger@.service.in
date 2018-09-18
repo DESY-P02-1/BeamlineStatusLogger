@@ -1,0 +1,12 @@
+[Unit]
+Description=Log beamline attributes to a database
+After=network.target
+
+[Service]
+Type=simple
+ExecStart={script} {confdir}%i
+Restart=on-failure
+RestartSec=10
+
+[Install]
+WantedBy=beamline_status_logger.target
