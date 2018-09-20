@@ -24,6 +24,8 @@ wheels/
 *.egg-info/
 .installed.cfg
 *.egg
+debian/
+.pybuild/
 
 # PyInstaller
 #  Usually these files are written by a python script from a template
@@ -110,5 +112,5 @@ ENV/
 # visual studio code
 .vscode
 
-
-
+# logs
+log_dir/
