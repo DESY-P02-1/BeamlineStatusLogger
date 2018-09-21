@@ -20,10 +20,13 @@ def install_system_service(infile, outfile, script, confdir):
 class CustomInstall(install):
     def run(self):
         super().run()
-        if SERVICEPATH.startswith("/"):
-            servicepath = os.path.join(self.root, SERVICEPATH[1:])
+        if self.root:
+            if SERVICEPATH.startswith("/"):
+                servicepath = os.path.join(self.root, SERVICEPATH[1:])
+            else:
+                servicepath = os.path.join(self.root, SERVICEPATH)
         else:
-            servicepath = os.path.join(self.root, SERVICEPATH)
+            servicepath = SERVICEPATH
         log.info("writing " + servicepath)
         if not self.dry_run:
             install_system_service(
