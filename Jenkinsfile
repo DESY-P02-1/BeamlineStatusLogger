@@ -15,11 +15,12 @@ pipeline {
         }
         stage('test') {
             steps {
-                sh 'docker-compose exec -T tango-test python3 -m pytest --junitxml=build/results.xml'
+                sh 'docker-compose exec -T tango-test python3 -m pytest --junitxml=build/results.xml --cov=BeamlineStatusLogger --cov-report xml:coverage.xml'
             }
             post {
                 always {
                     junit 'build/results.xml'
+                    step([$class: 'CoberturaPublisher', coberturaReportFile: 'coverage.xml'])
                 }
             }
         }
