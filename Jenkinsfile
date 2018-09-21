@@ -1,28 +1,32 @@
-node {
-    checkout scm
-
-    stage('build docker image') {
-        sh 'docker-compose build'
-    }
-
-    try {
-        sh 'docker-compose up -d'
-        sh 'sleep 3'
-
-        stage('style') {
-            sh 'docker-compose exec -T tango-test python3 -m flake8'
+pipeline {
+    agent any
+    stages {
+        stage('build docker image') {
+            steps {
+                sh 'docker-compose build'
+                sh 'docker-compose up -d'
+                sh 'sleep 3'
+            }
         }
-
+        stage('style') {
+            steps {
+                sh 'docker-compose exec -T tango-test python3 -m flake8'
+            }
+        }
         stage('test') {
-            try {
+            steps {
                 sh 'docker-compose exec -T tango-test python3 -m pytest --junitxml=build/results.xml'
             }
-            finally {
-                junit 'build/results.xml'
+            post {
+                always {
+                    junit 'build/results.xml'
+                }
             }
         }
     }
-    finally {
-        sh 'docker-compose down --volume'
+    post {
+        always {
+            sh 'docker-compose down --volume'
+        }
     }
 }
