@@ -1,0 +1,22 @@
+version: '2'
+services:
+  tango-test:
+    build: ".ci/debian9"
+    image: tango-test
+    expose:
+      - "10000"
+  influxdb-test:
+    image: "influxdb"
+    expose:
+      - "8086"
+  beamline_status_logger:
+    # reuse the tango-test image
+    # alternatively, one could run the tests in that container directly
+    image: tango-test
+    depends_on:
+      - tango-test
+      - influxdb-test
+    environment:
+      - INFLUXDB_HOST=influxdb-test
+    volumes:
+     - .:/code

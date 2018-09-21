@@ -58,6 +58,7 @@ ADD tango-test-db.tar.gz /
 
 ENV TANGO_HOST=tango-test:10000
 
+WORKDIR /code
 
 # start supervisor as deamon
 CMD /usr/bin/supervisord
