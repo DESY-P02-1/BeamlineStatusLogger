@@ -1,0 +1,16 @@
+sudo: required
+
+services:
+    - docker
+
+language: python
+
+install:
+    - docker-compose build
+    - docker-compose up -d
+    - sleep 3
+
+script:
+    - docker-compose exec -T tango-test python3 -m pip install .
+    - docker-compose exec -T tango-test python3 -m flake8
+    - docker-compose exec -T tango-test python3 -m pytest
