@@ -5,54 +5,70 @@ FROM debian:stretch
 # The container must be started with --hostname tango-test
 
 
-RUN apt-get update
-
-
 # change installation dialogs policy to noninteractive
 # otherwise debconf raises errors: unable to initialize frontend: Dialog
-ENV DEBIAN_FRONTEND noninteractive
+# Do not use ENV because that would be persisting at runtime
+ARG DEBIAN_FRONTEND=noninteractive
 
 
 # install mysql
-RUN apt-get -y install mysql-server
-# workarounds for problems with starting mysqld
-RUN sed -i 's/\/var\/run\/mysqld\/mysqld.pid/\/tmp\/mysqld.pid/g' /etc/mysql/mariadb.conf.d/50-server.cnf
-RUN sed -i 's/\/var\/run\/mysqld\/mysqld.sock/\/tmp\/mysqld.sock/g' /etc/mysql/mariadb.conf.d/50-server.cnf
-RUN mkdir /var/run/mysqld
-RUN ln -s /tmp/mysqld.sock /var/run/mysqld/mysqld.sock
-RUN ln -s /tmp/mysqld.pid /var/run/mysqld/mysqld.pid
+# and workaround for problems with starting mysqld
+RUN apt-get update && apt-get -y install mysql-server \
+    && sed -i 's/\/var\/run\/mysqld\/mysqld.pid/\/tmp\/mysqld.pid/g' \
+            /etc/mysql/mariadb.conf.d/50-server.cnf \
+    && sed -i 's/\/var\/run\/mysqld\/mysqld.sock/\/tmp\/mysqld.sock/g' \
+            /etc/mysql/mariadb.conf.d/50-server.cnf \
+    && mkdir /var/run/mysqld \
+    && ln -s /tmp/mysqld.sock /var/run/mysqld/mysqld.sock \
+    && ln -s /tmp/mysqld.pid /var/run/mysqld/mysqld.pid
 
 
-# install tango-db
-RUN echo 'tango-common tango-common/tango-host string tango-test:10000' | debconf-set-selections \
-    && echo 'tango-db tango-db/dbconfig-install boolean false' | debconf-set-selections \
-    && apt-get install -y tango-db
-
-
-#install tango-test
-RUN apt-get install -y tango-test
-
-
-# install PyTango
-RUN apt-get -y install python3-pytango
+# install tango
+RUN echo 'tango-common tango-common/tango-host string tango-test:10000' \
+    | debconf-set-selections \
+    && echo 'tango-db tango-db/dbconfig-install boolean false' \
+    | debconf-set-selections \
+    && apt-get update && apt-get install -y \
+        tango-db \
+        tango-test \
+        python3-pytango
 
 
 # Install additional dependencies for package testing
-RUN apt-get -y install procps python3-pip python3-pytest python3-pytest-cov python3-flake8 python3-scipy python3-skimage
-
-RUN pip3 install influxdb
+RUN apt-get update && apt-get install -y \
+        procps \
+        python3-pip \
+        python3-pytest \
+        python3-pytest-cov \
+        python3-flake8 \
+        python3-scipy \
+        python3-skimage \
+    && pip3 install influxdb
 
 
 # more info at https://docs.docker.com/config/containers/multi-service_container/
 # install and configure supervisor
-RUN apt-get install -y supervisor
-RUN mkdir -p /var/log/supervisor
+RUN apt-get install -y supervisor \
+    && mkdir -p /var/log/supervisor
 
 
 # configure supervisord
 COPY supervisord.conf /etc/supervisor/conf.d/
 
 
+# This file was created with the following commands
+# docker run -it --name tango-test --hostname tango-test debian:stretch /bin/bash
+# apt update
+# apt install dialog
+# apt install mysql-server
+# service mysql start
+# apt install tango-db # answers: tango-test:1000, yes, test1234, test1234
+# service tango-db start
+# apt install tango-test
+# /usr/lib/tango/TangoTest test
+# tar -zcvf tango-test-db.tar.gz /var/lib/mysql/tango/ /etc/tangorc /var/lib/tango/.my.cnf
+# exit
+# docker container cp tango-test:tango-test-db.tar.gz .
 ADD tango-test-db.tar.gz /
 
 
