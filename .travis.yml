@@ -14,3 +14,21 @@ script:
     - docker-compose exec -T tango-test python3 -m pip install .
     - docker-compose exec -T tango-test python3 -m flake8
     - docker-compose exec -T tango-test python3 -m pytest
+
+before_deploy:
+    - git clone -b debian --single-branch --depth=1 https://github.com/${TRAVIS_REPO_SLUG}.git $TRAVIS_REPO_SLUG
+    - cp -r $TRAVIS_REPO_SLUG/debian .
+    - docker-compose exec -T tango-test debuild -us -uc
+    - docker-compose exec -T tango-test bash -c "cp ../*.deb ."
+    - ls -l
+
+deploy:
+  provider: releases
+  api_key:
+    secure: f8m8V71cyFtt5uYC1SgfZgA4LnxawJZlKR3CXrotavZQY51Xye8K2+FOe3p3fftWldz3QTmTIQPNFgaRCtWecC2IYMc+ikQHbpQKNkwaApIMn7ff0pYHOvfe3q09gUPt1dx1/uWA+/YnIT7eUiEov+haBok/Cq9cYar501gY9y16nt/auirwh/xUcnd2JCGku7ujm1UovccyTBfHZ6L+J3/ObC50BedcVlG8JtPz5tDjh0u2W3fELQu2wADtwYY8wDL3HFs79crGOgsJ9BOPth+w31M1kmU09cWZxqR7YwNwfX7l4rjU7BthRn8Pax0eZeLq/hUUw4q/3IlyonFAfK0vD1YQcU5hD0OISJOn3Vy02o/bPORaSr9vABti8QAhzkHSgGshe4ldTZpLAhpV2uc9G+BH7SKPPBITAoOLoCxQ5Z2xQeAPdroRbsZcxJlbePEujmnVfZZcwqVbnIbB1NI9UjEREwdAVHmHlCXWhncKQ1N5XrH1687MljZ1hzx4dt5fIRcsNLHD67h3blXRHK98Z2NKxrx9/chQATcqqvGekan0SDSQibUMHnTetGRmQQmrUlyJlNAQ7lpUj1ElesgP/KaBXW3YdXScGuGhYY5jENyUoOij+ojZjDYrzoo3d8qWnGMt9kih0FUSc7f9uqhFZfIz4842aoNgDYN2hes=
+  file_glob: true
+  file: "*.deb"
+  skip_cleanup: true
+  on:
+    repo: DESY-P02-1/BeamlineStatusLogger
+    branch: ci-deb

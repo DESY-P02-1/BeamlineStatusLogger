@@ -43,6 +43,8 @@ RUN apt-get update && apt-get install -y \
         python3-flake8 \
         python3-scipy \
         python3-skimage \
+        devscripts \
+        debhelper \
     && pip3 install influxdb
 
 
