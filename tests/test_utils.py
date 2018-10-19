@@ -42,7 +42,8 @@ class TestUtils:
 
         img, p, cutoff, s_noise = utils.create_test_image(peak=False)
 
-        with pytest.raises(utils.SmallRegionError):  # LargeNoiseError?
+        with pytest.raises(utils.FittingError,
+                           match=r".*(possible|large) regions of interest.*"):
             utils.get_peak_parameters(img)
 
     @pytest.mark.parametrize('file, params', [

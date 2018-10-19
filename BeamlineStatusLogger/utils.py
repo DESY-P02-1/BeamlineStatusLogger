@@ -110,6 +110,9 @@ def estimate_background(img):
 
 def estimate_noise(I):
     # from https://stackoverflow.com/a/25436112
+    """
+        Estimates the variance of zero mean Gaussian noise
+    """
     H, W = I.shape
 
     M = [[1, -2, 1],
@@ -349,7 +352,7 @@ def get_peak_parameters(img):
     img -= bg
 
     # estimate remaining noise
-    s = estimate_noise(img)
+    s = math.sqrt(estimate_noise(img))
 
     # estimate a threshold
     thresh = find_threshold(img)
