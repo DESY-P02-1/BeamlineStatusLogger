@@ -282,7 +282,7 @@ def find_roi(img, thresh, min_size=10):
     img2 = img.copy()
 
     # if the peak is significantly smaller than max, it will be missed
-    img2[img2 < thresh] = 0
+    img2[img2 <= thresh] = 0
     img2[img2 > thresh] = 1
 
     # find connected regions with max intensity
@@ -296,7 +296,7 @@ def find_roi(img, thresh, min_size=10):
     regions = [r for r in regions if r.area > 10]
 
     if not regions:
-        raise SmallRegionError("No sufficiently large regions of interest" +
+        raise SmallRegionError("No sufficiently large regions of interest " +
                                "found")
 
     # choose region closest to the center of mass
