@@ -163,7 +163,7 @@ class NoRegionError(FittingError):
 
 
 class SmallRegionError(FittingError):
-    """Indicates that no region of interest could be found"""
+    """Indicates that too small or too many regions of interest were found"""
     pass
 
 
@@ -302,8 +302,23 @@ def find_roi(img, thresh, min_size=10):
     if not regions:
         raise NoRegionError("No regions of interest found")
 
-    # skip small regions
-    regions = [r for r in regions if r.area > 10]
+    # if there are many regions, candidate regions must be significantly larger
+    n_regions = len(regions)
+    if n_regions > 10:
+        min_size = 50
+    else:
+        min_size = 10
+
+    # if there are too many regions, the threshold was too low
+    # this indicates that there is no pronounced peak
+    # additionally the probability is too high that one of these many noisy
+    # regions fulfills the following criteria by pure chance
+    if len(regions) > 50:
+        raise SmallRegionError("Too many possible regions of interest found")
+
+    regions = [r for r in regions if r.area >= min_size
+               and r.eccentricity <= 0.95  # exlude lines
+               and r.solidity >= 0.75]  # exclude cheesy regions (with holes)
 
     if not regions:
         raise SmallRegionError("No sufficiently large regions of interest " +

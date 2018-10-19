@@ -2,6 +2,14 @@ import BeamlineStatusLogger.utils as utils
 import scipy.ndimage as scimg
 import pytest
 from pytest import approx
+from glob import glob
+import numpy as np
+
+
+def eccentricity(sx, sy):
+    if sx < sy:
+        sx, sy = sy, sx
+    return np.sqrt(1 - sy**2/sx**2)
 
 
 class TestUtils:
@@ -9,9 +17,9 @@ class TestUtils:
     def test_get_peak_parameters(self, repeat):
         utils.np.random.seed(1234*repeat)
 
-        # ensure strong enough signal
+        # ensure strong enough signal without large eccentricity
         h, a, x0, y0, sx, sy, theta, img_gauss, cutoff, s_noise = [0]*10
-        while (cutoff-h) <= 4*s_noise:
+        while (cutoff-h) <= 4*s_noise or eccentricity(sx, sy) > 0.95:
             img_gauss, p, cutoff, s_noise = utils.create_test_image()
             h, a, x0, y0, sx, sy, theta = p
 
@@ -105,13 +113,28 @@ class TestUtils:
         assert cutoff_f == approx(cutoff, rel=rel,
                                   abs=3*s_noise)   # inaccurate due to filter
 
-        @pytest.mark.parametrize('file', [
-            "tests/images/no_beam/LM10_no_beam.png",
-            "tests/images/no_beam/LM11_no_beam.png",
-            "tests/images/no_beam/LM12_no_beam.png"
-        ])
-        def test_get_peak_parameters_images_no_beam(self, file):
-            img = scimg.imread(file)
+    @pytest.mark.parametrize('file', [
+        "tests/images/no_beam/LM10_no_beam.png",
+        "tests/images/no_beam/LM11_no_beam.png",
+        "tests/images/no_beam/LM12_no_beam.png"
+    ])
+    def test_get_peak_parameters_images_no_beam(self, file):
+        img = scimg.imread(file, flatten=True)
 
-            with pytest.raises(utils.SmallRegionError):
-                utils.get_peak_parameters(img)
+        with pytest.raises(utils.SmallRegionError):
+            utils.get_peak_parameters(img)
+
+    @pytest.mark.parametrize('file', glob("tests/images/beam/*.npy"))
+    def test_get_peak_parameters_images_beam_raw(self, file):
+        img = np.load(file)
+
+        p_fit = utils.get_peak_parameters(img)
+        assert p_fit
+
+    @pytest.mark.parametrize('file', glob("tests/images/no_beam/*.npy"))
+    def test_get_peak_parameters_images_no_beam_raw(self, file):
+        img = np.load(file)
+
+        with pytest.raises(utils.FittingError,
+                           match=r".*(possible|large) regions of interest.*"):
+            utils.get_peak_parameters(img)
