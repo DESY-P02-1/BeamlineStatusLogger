@@ -126,11 +126,18 @@ def estimate_noise(I):
 
 
 def improve_img(img):
-    # filter dead pixels and high frequency noise
+    # filter dead pixels
     # https://stackoverflow.com/questions/18951500/automatically-remove-hot-dead-pixels-from-an-image-in-python # noqa
-    img = scimg.median_filter(img, 2)
+    img_filtered = scimg.median_filter(img, 3)
 
-    return img
+    mask = np.abs(img_filtered - img)/(img_filtered.max()
+                                       - img_filtered.min()) > 0.2
+
+    img_masked = img.copy()
+
+    img_masked[mask] = img_filtered[mask]
+
+    return img_masked
 
 
 def find_threshold(img, background=0):
