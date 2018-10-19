@@ -5,6 +5,7 @@ from datetime import datetime
 from pytz import timezone
 import pytest
 import os
+import uuid
 
 
 def test_filter_nones():
@@ -25,11 +26,9 @@ def influx_client():
 
 @pytest.fixture
 def new_db_name(influx_client):
-    i = 2
-    db_name = "test" + str(i)
+    db_name = "test_" + str(uuid.uuid4())
     while {"name": db_name} in influx_client.get_list_database():
-        i += 1
-        db_name = "test" + str(i)
+        db_name = "test_" + str(uuid.uuid4())
     yield db_name
     if {"name": db_name} in influx_client.get_list_database():
         influx_client.drop_database(db_name)
