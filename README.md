@@ -1,5 +1,7 @@
 # BeamlineStatusLogger
 
+[![Build Status](https://travis-ci.com/DESY-P02-1/BeamlineStatusLogger.svg?branch=master)](https://travis-ci.com/DESY-P02-1/BeamlineStatusLogger)
+
 Log beamline attributes to a database.
 
 A *logger* reads data from a *source* and writes it to a *sink*, optionally applying one or more *processors*. It is triggered by a *timer*. The whole pipeline can be defined by INI style configuration files.
