@@ -64,9 +64,9 @@ class TangoDeviceAttributeSource:
             #       a successful read
             timestamp = tango.TimeVal.todatetime(tango.TimeVal.now())
             timestamp = self.localtz.localize(timestamp)
-            return Data(timestamp, None, err, metadata=self.metadata)
+            return Data(timestamp, None, err, metadata=self.metadata.copy())
         timestamp = tango.TimeVal.todatetime(device_attribute.get_date())
         timestamp = self.localtz.localize(timestamp)
         value = {self.attribute_name: device_attribute.value,
                  "quality": str(device_attribute.quality)}
-        return Data(timestamp, value, metadata=self.metadata)
+        return Data(timestamp, value, metadata=self.metadata.copy())
