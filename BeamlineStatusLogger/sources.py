@@ -33,6 +33,9 @@ class Data:
 class TangoDeviceAttributeSource:
     """A wrapper around a PyTango DeviceProxy that satisfies the Source interface.
 
+    The "quality" tag of the device attribute is returned as part of the
+    metadata.
+
     Parameters
     ----------
     device_name : string
@@ -50,6 +53,10 @@ class TangoDeviceAttributeSource:
         # Test if attribute exists
         self.device.attribute_query(attribute_name)
         self.metadata = metadata
+        if "quality" in self.metadata:
+            raise ValueError("The metadata entry 'quality' is reserved for the"
+                             "device attribute field of the same name. Choose"
+                             "a different name instead.")
         if tz:
             self.localtz = tz
         else:
@@ -67,6 +74,7 @@ class TangoDeviceAttributeSource:
             return Data(timestamp, None, err, metadata=self.metadata.copy())
         timestamp = tango.TimeVal.todatetime(device_attribute.get_date())
         timestamp = self.localtz.localize(timestamp)
-        value = {self.attribute_name: device_attribute.value,
-                 "quality": str(device_attribute.quality)}
-        return Data(timestamp, value, metadata=self.metadata.copy())
+        value = {self.attribute_name: device_attribute.value}
+        metadata = self.metadata.copy()
+        metadata["quality"] = str(device_attribute.quality)
+        return Data(timestamp, value, metadata=metadata)

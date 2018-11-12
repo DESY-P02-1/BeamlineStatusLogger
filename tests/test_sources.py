@@ -29,6 +29,13 @@ class TestTangoDeviceAttributeSource:
         with pytest.raises(tango.DevFailed):
             TangoDeviceAttributeSource(device_name, attribute_name)
 
+    def test_init_metadata_contains_quality(self):
+        device_name = "sys/tg_test/1"
+        attribute_name = "float_scalar"
+        with pytest.raises(ValueError):
+            TangoDeviceAttributeSource(device_name, attribute_name,
+                                       metadata={"quality": "bad"})
+
     def test_read_success(self):
         device_name = "sys/tg_test/1"
         attribute_name = "float_scalar"
@@ -41,8 +48,8 @@ class TestTangoDeviceAttributeSource:
         assert data.timestamp - now < maxdelta
         assert data.failure is None
         assert data.value[attribute_name] == 0
-        assert data.metadata == {"attribute": attribute_name}
         assert data.metadata is not s.metadata
+        assert data.metadata["attribute"] == attribute_name
 
     def test_read_failure(self, monkeypatch):
         device_name = "sys/tg_test/1"
@@ -63,5 +70,5 @@ class TestTangoDeviceAttributeSource:
         assert data.timestamp - now < maxdelta
         assert data.failure is ex
         assert data.value is None
-        assert data.metadata == {"attribute": attribute_name}
         assert data.metadata is not s.metadata
+        assert data.metadata["attribute"] == attribute_name
