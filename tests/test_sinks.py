@@ -121,19 +121,21 @@ class TestInfluxDBSink:
         assert rows[0]["id"] == "1234"
         assert rows[0]["attribute"] == "postition"
 
-    def test_write_none(self, influx_client, influx_sink):
+    @pytest.mark.parametrize("value", [None, {"value": None}])
+    def test_write_none(self, influx_client, influx_sink, value):
         time = datetime(2018, 8, 15, 17, 37, 39, 660510)
-        data = Data(time, None, metadata={"attribute": "postition"})
+        data = Data(time, value, metadata={"attribute": "postition"})
         success = influx_sink.write(data)
-        assert not success
-        data2 = Data(time, {"value": None},
-                     metadata={"attribute": "postition"})
-        success = influx_sink.write(data2)
         assert not success
         res = influx_client.query("SELECT * FROM " +
                                   influx_sink.measurement)
         rows = list(res.get_points())
-        assert not rows
+        assert len(rows) == 1
+        assert len(rows[0]) == 4
+        assert rows[0]["time"] == '2018-08-15T17:37:39.660509952Z'
+        assert rows[0]["NoValue"]
+        assert rows[0]["id"] == "1234"
+        assert rows[0]["attribute"] == "postition"
 
     def test_write_failure(self, influx_client, influx_sink):
         time = datetime(2018, 8, 15, 17, 37, 39, 660510)

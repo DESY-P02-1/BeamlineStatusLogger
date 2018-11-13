@@ -31,6 +31,8 @@ class InfluxDBSink:
             success = success and data.failure is None
             return success
         else:
+            point["fields"] = {"NoValue": True}
+            self.client.write_points([point])
             return False
 
     def _format(self, data):
