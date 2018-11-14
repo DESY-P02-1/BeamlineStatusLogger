@@ -1,0 +1,7 @@
+#!/bin/bash
+set -e
+
+adduser --quiet \
+        --system \
+        --home /etc/beamline-status-logger \
+        beamline-status-logger
