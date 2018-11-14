@@ -1,0 +1,43 @@
+## This configuration file contains an example for a simple logger instance
+## More complicated logger instances can be created using the Python API
+
+## Configuration files can be based on a parent configuration file
+## Entries in child configuration files will take precedence
+# [based on]
+# beam_parameters.base
+
+## The entries listed here will be attached to every data point
+# [metadata]
+# device = ${source:device_name}
+
+## The source of the logger
+## This section and its class entry are mandatory
+# [source]
+# class = TangoDeviceAttributeSource
+# device_name = haspp02ch1:10000/hasylab/p02_lm10/output
+# attribute_name = frame
+
+## A processor
+## This section is optional but if present, the class entry is mandatory
+# [processor]
+# class = PeakFitter
+# key = ${source:attribute_name}
+
+## The sink of the logger
+## This section and its class entry are mandatory
+# [sink]
+# class = InfluxDBSink
+# database = test
+# measurement = beam_parameters
+# host = localhost
+# port = 8086
+# create_db = False
+
+## The time of the logger
+## This section and its class entry are mandatory
+# [timer]
+# class = SynchronizedPeriodicTimer
+# period = 5
+# offset = 0.05
+# p_max = 2560
+# fail_tol = 3

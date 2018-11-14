@@ -2,11 +2,11 @@ from setuptools import setup
 from setuptools.command.install import install
 from distutils import log
 import os
-import glob
 
 CONFDIR = "/etc/beamline_status_logger"
 SCRIPTNAME = "beamline_status_logger"
 SERVICEPATH = "/lib/systemd/system/beamline_status_logger@.service"
+EXAMPLEDIR = "/usr/share/doc/beamline_status_logger/examples"
 
 
 def install_system_service(infile, outfile, script, confdir):
@@ -60,8 +60,8 @@ setup(name="BeamlineStatusLogger",
       zip_safe=False,
       data_files=[
             ("/lib/systemd/system", ["config/beamline_status_logger.target"]),
-            (CONFDIR, (glob.glob("config/*.logger")
-                       + glob.glob("config/*.base")))
+            (CONFDIR, []),
+            (EXAMPLEDIR, ["config/example.logger"])
       ],
       scripts=[os.path.join("bin/", SCRIPTNAME)],
       cmdclass={
