@@ -45,6 +45,8 @@ RUN apt-get update && apt-get install -y \
         python3-skimage \
         devscripts \
         debhelper \
+        quilt \
+        adduser \
     && pip3 install influxdb
 
 
