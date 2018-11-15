@@ -49,7 +49,7 @@ setup(name="BeamlineStatusLogger",
       description="Log data from a source to a sink",
       author="Tim Schoof",
       author_email="tim.schoof@desy.de",
-      packages=["BeamlineStatusLogger", "tests"],
+      packages=["BeamlineStatusLogger"],
       install_requires=[
           "PyTango",  # PyTango takes very long to install by pip
           "influxdb",  # not in Debian stretch
