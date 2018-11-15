@@ -1,0 +1,13 @@
+Description: Fix install path of example configuration files
+Author: Tim Schoof <tim.schoof@desy.de>
+--- a/setup.py
++++ b/setup.py
+@@ -6,7 +6,7 @@
+ CONFDIR = "/etc/beamline_status_logger"
+ SCRIPTNAME = "beamline_status_logger"
+ SERVICEPATH = "/lib/systemd/system/beamline_status_logger@.service"
+-EXAMPLEDIR = "/usr/share/doc/beamline_status_logger/examples"
++EXAMPLEDIR = "/usr/share/doc/python3-beamline-status-logger/examples"
+ 
+ 
+ def install_system_service(infile, outfile, script, confdir):
