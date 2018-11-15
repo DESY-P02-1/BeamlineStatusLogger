@@ -31,4 +31,4 @@ deploy:
   skip_cleanup: true
   on:
     repo: DESY-P02-1/BeamlineStatusLogger
-    branch: ci-deb
+    tags: true
