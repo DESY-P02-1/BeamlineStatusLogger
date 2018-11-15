@@ -8,6 +8,31 @@ def filter_nones(dic):
 
 
 class InfluxDBSink:
+    """A wrapper around an InfluxDBClient that satisfies the Sink interface.
+
+    Values of type None are removed before a point is written to the database.
+    If the data to be written contains no fields or only fields of type None,
+    A NoValue field with the value True is written instead.
+
+    Parameters
+    ----------
+    database : string
+        Name of the database that data is written to
+    measurement : string
+        Name of the measurement that data is written to
+    host : string
+        InfluxDB host. If not given, the environment variable INFLUXDB_HOST is
+        used instead
+    port : string or int
+        InfluxDB port. If not given, the environment variable INFLUXDB_PORT is
+        used instead
+    create_db : Booolean
+        If True, the database is created if it does not already exist
+    metadata : mapping
+        These entries are appended as the tags to each point
+
+    Additional parameters are forwarded to the InfluxDBClient.
+    """
     def __init__(self, database, measurement,
                  host=os.environ.get("INFLUXDB_HOST", "localhost"),
                  port=os.environ.get("INFLUXDB_PORT", "8086"),
