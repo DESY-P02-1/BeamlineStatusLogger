@@ -3,6 +3,8 @@ Section: python3
 Priority: optional
 Maintainer: Tim Schoof, <tim.schoof@desy.de>
 Build-Depends: debhelper (>= 10~),
+               adduser,
+               quilt,
                dh-python,
                python3-setuptools,
                python3 (>= 3.5)
@@ -14,3 +16,5 @@ Architecture: all
 Depends: ${python3:Depends}, ${misc:Depends}
 Description: Beamline status logger
  Log beamline attributes to a database
+
+#DEBHELPER#
