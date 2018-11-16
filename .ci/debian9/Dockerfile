@@ -47,6 +47,7 @@ RUN apt-get update && apt-get install -y \
         debhelper \
         quilt \
         adduser \
+        git-buildpackage \
     && pip3 install influxdb
 
 

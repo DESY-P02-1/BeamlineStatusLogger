@@ -5,6 +5,14 @@ services:
 
 language: python
 
+env:
+  global:
+    secure: Y+abqyEYGA8OOcm+HlGTdyYM8vpDUCrhaSgdJWd1gQjSHLs9Jn1gmPByVp5Ozf6CKv2AeNjj7695e+I+WXq254x04I1WtPFmQOGSCUOALY5IzFrj0FMW76nHAswIzZBU86prGnEvfpIakymIn0X7nq2omDKOGy2AM/adLO3pqSiO1vKgjVzsx3AjdHKQTT6odUnVNPSeQnF/jddoKBGomfrYYkvNBaCV9ZTvaCF8biRrQqHQ7dOxbhEbkp/mLm/laEI0uszli5n9XD5aQaIJo68RVfqAeJNAgykdwJVoeyFGoeMPimLCuUxvyt0bI5+4JqTObpefFwKbip4Ab0cyoAOq5a7gClDeg7aqI0Kp7bWwIXqU52ScwJrRnXLgvuZ/EQ/nTJP9gN5+5R2aco8NX6mxjqe2aCIx7oBUOCsYOYHQUUzKInfoeKzSwd6x7qm5YmXI1YEmkvjwsAhP7vR8dxhP9suKq2gDA3oeeYqA7s+nUlhLIx0AXFiGF4Zg6Y4i4g7h0VFolUwhZTB2TtuwKqFNVzFrCgzEJbPlbDDVFvmopCZxF8s7c4PHUtZkUf7ArrlzzOSVgT/XH6GCHDMq3z3C098A7r7JiPGOKV5iQ19PsquC46XdH/LjoFvipDYYSQNolxxgXv++QdW0H9sBJ8LFKwtB4YuuJhy7pO26MwY=
+
+branches:
+  except:
+    - debian
+
 install:
     - docker-compose build
     - docker-compose up -d
@@ -16,16 +24,12 @@ script:
     - docker-compose exec -T tango-test python3 -m pytest
 
 before_deploy:
-    - git clone -b debian --single-branch --depth=1 https://github.com/${TRAVIS_REPO_SLUG}.git $TRAVIS_REPO_SLUG
-    - cp -r $TRAVIS_REPO_SLUG/debian .
-    - docker-compose exec -T tango-test debuild -us -uc
-    - docker-compose exec -T tango-test bash -c "cp ../*.deb ."
-    - ls -l
+    - .ci/travis/deploy.sh
 
 deploy:
   provider: releases
   api_key:
-    secure: f8m8V71cyFtt5uYC1SgfZgA4LnxawJZlKR3CXrotavZQY51Xye8K2+FOe3p3fftWldz3QTmTIQPNFgaRCtWecC2IYMc+ikQHbpQKNkwaApIMn7ff0pYHOvfe3q09gUPt1dx1/uWA+/YnIT7eUiEov+haBok/Cq9cYar501gY9y16nt/auirwh/xUcnd2JCGku7ujm1UovccyTBfHZ6L+J3/ObC50BedcVlG8JtPz5tDjh0u2W3fELQu2wADtwYY8wDL3HFs79crGOgsJ9BOPth+w31M1kmU09cWZxqR7YwNwfX7l4rjU7BthRn8Pax0eZeLq/hUUw4q/3IlyonFAfK0vD1YQcU5hD0OISJOn3Vy02o/bPORaSr9vABti8QAhzkHSgGshe4ldTZpLAhpV2uc9G+BH7SKPPBITAoOLoCxQ5Z2xQeAPdroRbsZcxJlbePEujmnVfZZcwqVbnIbB1NI9UjEREwdAVHmHlCXWhncKQ1N5XrH1687MljZ1hzx4dt5fIRcsNLHD67h3blXRHK98Z2NKxrx9/chQATcqqvGekan0SDSQibUMHnTetGRmQQmrUlyJlNAQ7lpUj1ElesgP/KaBXW3YdXScGuGhYY5jENyUoOij+ojZjDYrzoo3d8qWnGMt9kih0FUSc7f9uqhFZfIz4842aoNgDYN2hes=
+    secure: Ea7cFPkGMT4tCFSxRvz1x4BEzP0aZ0482DS2dC5ZEwnw52KB8J687Vscjh8MQReExsbkv8xX7kVs1I4a5uP4s7lG//jUs01bbZcV/nWy7zLY0cgGxWU2QIb7OlVrulEsCK55g338wIIZ4tycsmFBQ08ubP1x1TUhVbX5Df+x4RL88AmQhnJql8JXYMgV6J1Q1sz9P0/GTO4uMI/fGyA6K40rbvB+pf2hc0wtsb6HY6+uuVpfAKABYair7FfVSOm3mD9/IEKdARe+NCGh5MyDl/Rc8EA3npNjTzjbWjjJfxQYpIlTS5J6QcpDQ7K/Nlye4OJspnxdqzJ1TzgLd8lR42izW2H6SK14gVvUm0SYxNOevswrchxXUn8hwF7c/yi5+02iWSsDUK1yUc36zyM4myiK632dvGGZ26vV6j59rP/2us5lCDcij9F5lQRJO7a26jpeWKq7E5MYdfqDKckbJCuGCgnMaxBtnhTMXg6gAeAvZftTDpG7o1Co9EWnqUEwMdvEt8OIS6gRX/H4hzaLwNHt1WuVIxUyqDT53sMCd7iPOvsizNv+IYaMjq68meEu+d1X93FgccvPsSId3po9iUX/3/yaf9zm28jpeVgxDvVM9VKxdkK/q0/4Q6AY6NkNfxyS4cB24/3XA8SPWpk4+bsPzlAs8muvb6JlOzcAdBk=
   file_glob: true
   file: "*.deb"
   skip_cleanup: true
