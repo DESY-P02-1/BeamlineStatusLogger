@@ -1,5 +1,5 @@
-python3-beamline-status-logger (0.0.1) UNRELEASED; urgency=medium
+python3-beamline-status-logger (0.0.1) unknown; urgency=medium
 
   * Initial release.
 
- -- MAINTAINER <schooft@haso232s.desy.de>  Mon, 17 Sep 2018 15:02:02 +0200
+ -- Tim Schoof <tim.schoof@desy.de>  Mon, 17 Sep 2018 15:02:02 +0200
