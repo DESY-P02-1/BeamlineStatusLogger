@@ -1,3 +1,16 @@
+python3-beamline-status-logger (0.1.0) unknown; urgency=medium
+
+  [ Tim Schoof ]
+  * Create a new metadata dict for each data object returned from the source
+  * Save attribute quality as metadata instead of a value
+  * Save a Boolean "NoValue" entry if there are no non-None fields
+  * Add documentation for InfluxDBSink
+  * Further automate debian deployment
+
+  [ root ]
+
+ -- root <root@9787333ad243>  Fri, 16 Nov 2018 18:49:34 +0000
+
 python3-beamline-status-logger (0.0.1) unknown; urgency=medium
 
   * Initial release.
