@@ -14,6 +14,7 @@ branches:
     - debian
 
 install:
+    - pip install codecov
     - docker-compose build
     - docker-compose up -d
     - sleep 3
@@ -21,7 +22,11 @@ install:
 script:
     - docker-compose exec -T tango-test python3 -m pip install .
     - docker-compose exec -T tango-test python3 -m flake8
-    - docker-compose exec -T tango-test python3 -m pytest
+    - docker-compose exec -T tango-test python3 -m pytest --cov=BeamlineStatusLogger --cov-report xml:coverage.xml
+
+after_success:
+    - sudo chown travis:travis .coverage coverage.xml
+    - codecov
 
 before_deploy:
     - .ci/travis/deploy.sh

@@ -1,6 +1,7 @@
 # BeamlineStatusLogger
 
 [![Build Status](https://travis-ci.com/DESY-P02-1/BeamlineStatusLogger.svg?branch=master)](https://travis-ci.com/DESY-P02-1/BeamlineStatusLogger)
+[![codecov](https://codecov.io/gh/DESY-P02-1/BeamlineStatusLogger/branch/master/graph/badge.svg)](https://codecov.io/gh/DESY-P02-1/BeamlineStatusLogger)
 
 Log beamline attributes to a database.
 
