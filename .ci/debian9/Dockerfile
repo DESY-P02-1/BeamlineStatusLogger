@@ -40,6 +40,7 @@ RUN apt-get update && apt-get install -y \
         python3-pip \
         python3-pytest \
         python3-pytest-cov \
+        python3-pytest-mock \
         python3-flake8 \
         python3-scipy \
         python3-skimage \
