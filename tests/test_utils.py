@@ -50,8 +50,7 @@ class TestUtils:
 
         img, p, cutoff, s_noise = utils.create_test_image(peak=False)
 
-        with pytest.raises(utils.FittingError,
-                           match=r".*(possible|large) regions of interest.*"):
+        with pytest.raises(utils.LargeNoiseError):
             utils.get_peak_parameters(img)
 
     @pytest.mark.parametrize('file, params', [
@@ -121,7 +120,7 @@ class TestUtils:
     def test_get_peak_parameters_images_no_beam(self, file):
         img = scimg.imread(file, flatten=True)
 
-        with pytest.raises(utils.SmallRegionError):
+        with pytest.raises((utils.LargeNoiseError, utils.SmallRegionError)):
             utils.get_peak_parameters(img)
 
     @pytest.mark.parametrize('file', glob("tests/images/beam/*.npy"))
@@ -135,6 +134,5 @@ class TestUtils:
     def test_get_peak_parameters_images_no_beam_raw(self, file):
         img = np.load(file)
 
-        with pytest.raises(utils.FittingError,
-                           match=r".*(possible|large) regions of interest.*"):
+        with pytest.raises((utils.LargeNoiseError, utils.SmallRegionError)):
             utils.get_peak_parameters(img)
