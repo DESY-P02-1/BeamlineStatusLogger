@@ -1,3 +1,15 @@
+python3-beamline-status-logger (0.2.0) unknown; urgency=medium
+
+  [ Tim Schoof ]
+  * Enable codecov
+  * Fix tests
+  * Add limited support for TINE as a data source
+  * Bump version
+
+  [ root ]
+
+ -- root <root@13fc222b4aee>  Fri, 18 Oct 2019 15:50:39 +0000
+
 python3-beamline-status-logger (0.1.0) unknown; urgency=medium
 
   [ Tim Schoof ]
