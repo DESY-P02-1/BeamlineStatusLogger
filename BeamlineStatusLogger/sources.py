@@ -76,11 +76,11 @@ class TangoDeviceAttributeSource:
         except (tango.DevFailed, futures.TimeoutError) as err:
             # TODO: Check if this is close enough to the would be time of
             #       a successful read
-            timestamp = tango.TimeVal.todatetime(tango.TimeVal.now())
-            timestamp = self.localtz.localize(timestamp)
+            timestamp = tango.TimeVal.now().totime()
+            timestamp = datetime.fromtimestamp(timestamp, self.localtz)
             return Data(timestamp, None, err, metadata=self.metadata.copy())
-        timestamp = tango.TimeVal.todatetime(device_attribute.get_date())
-        timestamp = self.localtz.localize(timestamp)
+        timestamp = device_attribute.get_date().totime()
+        timestamp = datetime.fromtimestamp(timestamp, self.localtz)
         value = {self.attribute_name: device_attribute.value}
         metadata = self.metadata.copy()
         metadata["quality"] = str(device_attribute.quality)
@@ -176,23 +176,21 @@ class TINECameraSource:
         except (OSError, RuntimeError) as err:
             # TODO: Check if this is close enough to the would be time of
             #       a successful read
-            timestamp = datetime.now()
-            timestamp = self.localtz.localize(timestamp)
+            timestamp = datetime.now(self.localtz)
             return Data(timestamp, None, err, metadata=self.metadata.copy())
 
         status = tine.strerror(device_property["status"])
         metadata = self.metadata.copy()
         metadata["status"] = status
         if status.endswith(": success"):
-            timestamp = datetime.fromtimestamp(device_property["timestamp"])
-            timestamp = self.localtz.localize(timestamp)
+            timestamp = datetime.fromtimestamp(
+                device_property["timestamp"], self.localtz)
             try:
                 img = tine_image_to_numpy(device_property["data"])
             except ValueError as err:
                 return Data(timestamp, None, err, metadata=metadata)
             value = {self.property_name: img}
         else:
-            timestamp = datetime.now()
-            timestamp = self.localtz.localize(timestamp)
+            timestamp = datetime.now(self.localtz)
             value = None
         return Data(timestamp, value, metadata=metadata)

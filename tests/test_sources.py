@@ -46,8 +46,7 @@ class TestTangoDeviceAttributeSource:
         s = TangoDeviceAttributeSource(device_name, attribute_name,
                                        metadata={"attribute": attribute_name})
         data = s.read()
-        now = datetime.datetime.now()
-        now = timezone("Europe/Berlin").localize(now)
+        now = datetime.datetime.now(timezone("Europe/Berlin"))
         assert data.timestamp - now < maxdelta
         assert data.failure is None
         assert data.value[attribute_name] == 0
@@ -68,8 +67,7 @@ class TestTangoDeviceAttributeSource:
         monkeypatch.setattr(s.device, 'read_attribute', mockreturn)
 
         data = s.read()
-        now = datetime.datetime.now()
-        now = timezone("Europe/Berlin").localize(now)
+        now = datetime.datetime.now(timezone("Europe/Berlin"))
         assert data.timestamp - now < maxdelta
         assert data.failure is ex
         assert data.value is None
@@ -217,9 +215,8 @@ class TestTINECameraSource:
         s = TINECameraSource(self.dummy_address, self.dummy_property,
                              metadata={"device": self.dummy_address})
         data = s.read()
-        timestamp = timezone("Europe/Berlin").localize(
-            datetime.datetime.fromtimestamp(
-                reply["timestamp"]))
+        timestamp = datetime.datetime.fromtimestamp(
+                reply["timestamp"], timezone("Europe/Berlin"))
         assert data.timestamp == timestamp
         assert data.failure is None
         np.testing.assert_array_equal(data.value[self.dummy_property], img)
@@ -233,8 +230,7 @@ class TestTINECameraSource:
         ex = RuntimeError("Some error")
         tine_mock.get.side_effect = ex
         data = s.read()
-        now = datetime.datetime.now()
-        now = timezone("Europe/Berlin").localize(now)
+        now = datetime.datetime.now(timezone("Europe/Berlin"))
         assert data.timestamp - now < maxdelta
         assert data.failure is ex
         assert data.value is None
@@ -248,8 +244,7 @@ class TestTINECameraSource:
         tine_mock.get.side_effect = None
         tine_mock.get.return_value = dict(status=1)
         data = s.read()
-        now = datetime.datetime.now()
-        now = timezone("Europe/Berlin").localize(now)
+        now = datetime.datetime.now(timezone("Europe/Berlin"))
         assert data.timestamp - now < maxdelta
         assert data.failure is None
         assert data.value is None
@@ -262,9 +257,8 @@ class TestTINECameraSource:
         s = TINECameraSource(self.dummy_address, self.dummy_property,
                              metadata={"device": self.dummy_address})
         data = s.read()
-        timestamp = timezone("Europe/Berlin").localize(
-            datetime.datetime.fromtimestamp(
-                reply["timestamp"]))
+        timestamp = datetime.datetime.fromtimestamp(
+                reply["timestamp"], timezone("Europe/Berlin"))
         assert data.timestamp == timestamp
         assert isinstance(data.failure, ValueError)
         assert data.value is None
