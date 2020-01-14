@@ -1,6 +1,8 @@
 [Unit]
 Description=Log beamline attributes to a database
 After=network.target
+StartLimitIntervalSec=100
+StartLimitBurst=5
 
 [Service]
 Type=simple
