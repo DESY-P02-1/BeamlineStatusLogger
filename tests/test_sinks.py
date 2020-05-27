@@ -107,7 +107,7 @@ class TestInfluxDBSink:
         assert res["fields"]["error"] == "msg"
 
     def test_write(self, influx_client, influx_sink):
-        time = datetime(2018, 8, 15, 17, 37, 39, 660510)
+        time = datetime(2018, 8, 15, 17, 37, 39, 524288)
         time = timezone("Europe/Berlin").localize(time)
         data = Data(time, 1, metadata={"attribute": "postition"})
         success = influx_sink.write(data)
@@ -116,14 +116,14 @@ class TestInfluxDBSink:
                                   influx_sink.measurement)
         rows = list(res.get_points())
         assert len(rows) == 1
-        assert rows[0]["time"] == '2018-08-15T15:37:39.660509952Z'
+        assert rows[0]["time"] == '2018-08-15T15:37:39.524288Z'
         assert rows[0]["value"] == 1
         assert rows[0]["id"] == "1234"
         assert rows[0]["attribute"] == "postition"
 
     @pytest.mark.parametrize("value", [None, {"value": None}])
     def test_write_none(self, influx_client, influx_sink, value):
-        time = datetime(2018, 8, 15, 17, 37, 39, 660510)
+        time = datetime(2018, 8, 15, 17, 37, 39, 524288)
         data = Data(time, value, metadata={"attribute": "postition"})
         success = influx_sink.write(data)
         assert not success
@@ -132,13 +132,13 @@ class TestInfluxDBSink:
         rows = list(res.get_points())
         assert len(rows) == 1
         assert len(rows[0]) == 4
-        assert rows[0]["time"] == '2018-08-15T17:37:39.660509952Z'
+        assert rows[0]["time"] == '2018-08-15T17:37:39.524288Z'
         assert rows[0]["NoValue"]
         assert rows[0]["id"] == "1234"
         assert rows[0]["attribute"] == "postition"
 
     def test_write_failure(self, influx_client, influx_sink):
-        time = datetime(2018, 8, 15, 17, 37, 39, 660510)
+        time = datetime(2018, 8, 15, 17, 37, 39, 524288)
         data = Data(time, None, failure=Exception("msg"),
                     metadata={"attribute": "postition"})
         success = influx_sink.write(data)
@@ -147,5 +147,5 @@ class TestInfluxDBSink:
                                   influx_sink.measurement)
         rows = list(res.get_points())
         assert len(rows) == 1
-        assert rows[0]["time"] == '2018-08-15T17:37:39.660509952Z'
+        assert rows[0]["time"] == '2018-08-15T17:37:39.524288Z'
         assert rows[0]["error"] == "msg"

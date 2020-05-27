@@ -55,7 +55,8 @@ setup(name="BeamlineStatusLogger",
           "influxdb",  # not in Debian stretch
           "scipy",
           "scikit-image",
-          "pytz"
+          "pytz",
+          "imageio"
       ],
       zip_safe=False,
       data_files=[

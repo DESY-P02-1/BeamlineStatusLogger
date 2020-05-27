@@ -1,5 +1,5 @@
 import BeamlineStatusLogger.utils as utils
-import scipy.ndimage as scimg
+import imageio
 import pytest
 from pytest import approx
 from glob import glob
@@ -86,7 +86,7 @@ class TestUtils:
             (14.006, 385.92, 242.04, 484.14, 12.156, 15.391, 0.09851, 255))
     ])
     def test_get_peak_parameters_images(self, file, params):
-        img = scimg.imread(file, flatten=True)
+        img = imageio.imread(file, as_gray=True)
 
         h, a, x0, y0, sx, sy, theta, cutoff = params
 
@@ -118,7 +118,7 @@ class TestUtils:
         "tests/images/no_beam/LM12_no_beam.png"
     ])
     def test_get_peak_parameters_images_no_beam(self, file):
-        img = scimg.imread(file, flatten=True)
+        img = imageio.imread(file, as_gray=True)
 
         with pytest.raises((utils.LargeNoiseError, utils.SmallRegionError)):
             utils.get_peak_parameters(img)
