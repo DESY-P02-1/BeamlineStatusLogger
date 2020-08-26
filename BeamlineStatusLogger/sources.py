@@ -198,6 +198,8 @@ class TINECameraSource:
             timestamp = datetime.now(self.localtz)
             value = None
         return Data(timestamp, value, metadata=metadata)
+    
+    
 class TINEAttributeSource:
     def __init__(self, device_address, attr, metadata={}, tz=None):
         if tine is None:
@@ -209,6 +211,7 @@ class TINEAttributeSource:
             self.tzlocal = tz
         else:
             self.tzlocal = timezone('Europe/Berlin')
+            
     def read(self):
         attribut = tine.get(self.device_address, self.attr)
         test = attribut["data"]
