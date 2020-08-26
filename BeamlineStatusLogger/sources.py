@@ -209,7 +209,6 @@ class TINEAttributeSource:
         attribut = tine.get(self.device_address, self.attr)
         test = attribut["data"]
         value = {self.attr: test}
-        metadata = self.metadata.copy()
         failure = None
         tz = self.tzlocal
         timestamp = datetime.fromtimestamp(attribut["timestamp"], tz)
