@@ -3,9 +3,12 @@ import signal
 import argparse
 import configparser
 import glob
+import logging
 import os
 import threading
 import BeamlineStatusLogger as bsl
+
+log = logging.getLogger(__name__)
 
 parser = argparse.ArgumentParser(
     description="Excute beamline status logger instances defined in logger "
@@ -108,16 +111,26 @@ def main():
             config = parse_config_file(file)
             loggers.append(create_Logger(config))
 
-    def signalhandler(signum, frame):
+    def shutdown():
         for logger in loggers:
             logger.abort()
+
+    def signalhandler(signum, frame):
+        shutdown()
 
     signal.signal(signal.SIGINT, signalhandler)
     signal.signal(signal.SIGTERM, signalhandler)
 
+    def run_logger(logger):
+        try:
+            logger.run()
+        except Exception:
+            log.error("Abort due to error:", exc_info=True)
+            shutdown()
+
     threads = []
     for logger in loggers:
-        t = threading.Thread(target=logger.run)
+        t = threading.Thread(target=run_logger, args=(logger,))
         t.start()
         threads.append(t)
 
