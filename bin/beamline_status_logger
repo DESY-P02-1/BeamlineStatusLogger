@@ -2,14 +2,16 @@
 import signal
 import argparse
 import configparser
+import glob
 import os
+import threading
 import BeamlineStatusLogger as bsl
 
 parser = argparse.ArgumentParser(
     description="Excute beamline status logger instances defined in logger "
                 "configuration files.")
-parser.add_argument("config_file", type=str,
-                    help='Path to config file')
+parser.add_argument("config_path", type=str,
+                    help='Path to config file or directory')
 
 
 module_map = {"source": bsl.sources, "processor": bsl.processors,
@@ -96,16 +98,28 @@ def create_Logger(dictionary):
 
 def main():
     args = parser.parse_args()
-    config = parse_config_file(args.config_file)
-    logger = create_Logger(config)
+    config_path = args.config_path
+    if os.path.isfile(config_path):
+        config = parse_config_file(config_path)
+        loggers = [create_Logger(config)]
+    else:
+        loggers = []
+        for file in glob.iglob(config_path + "/*.logger"):
+            config = parse_config_file(file)
+            loggers.append(create_Logger(config))
 
     def signalhandler(signum, frame):
-        logger.abort()
+        for logger in loggers:
+            logger.abort()
 
     signal.signal(signal.SIGINT, signalhandler)
     signal.signal(signal.SIGTERM, signalhandler)
 
-    logger.run()
+    threads = []
+    for logger in loggers:
+        t = threading.Thread(target=logger.run)
+        t.start()
+        threads.append(t)
 
 
 if __name__ == "__main__":
