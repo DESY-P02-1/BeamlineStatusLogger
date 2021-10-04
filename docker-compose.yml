@@ -1,7 +1,7 @@
 version: '2'
 services:
   influxdb-test:
-    image: "influxdb"
+    image: "influxdb:1.8"
     expose:
       - "8086"
   tango-test:
