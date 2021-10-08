@@ -45,7 +45,7 @@ class CustomInstall(install):
 
 
 setup(name="BeamlineStatusLogger",
-      version="0.2.0",
+      version="0.3.0",
       description="Log data from a source to a sink",
       author="Tim Schoof",
       author_email="tim.schoof@desy.de",
