@@ -1,3 +1,19 @@
+python3-beamline-status-logger (0.3.0) unknown; urgency=medium
+
+  [ Tim Schoof ]
+  * Try to fix wrong timestamps during daylight saving time changes
+  * Limit number of restarts
+  * Fix errors in tests due to breaking changes in dependencies
+  * Fix influxdb tests
+  * Add ToString processor
+  * Start thread for each file in config directory
+  * Shutdown all threads in case of an error
+  * Bump version to 0.3.0
+
+  [ root ]
+
+ -- root <root@cc9f831fe3fb>  Fri, 08 Oct 2021 14:01:53 +0000
+
 python3-beamline-status-logger (0.2.0) unknown; urgency=medium
 
   [ Tim Schoof ]
