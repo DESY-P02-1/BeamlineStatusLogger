@@ -1,5 +1,5 @@
 import BeamlineStatusLogger.processors as procs
-from BeamlineStatusLogger.processors import PeakFitter
+from BeamlineStatusLogger.processors import PeakFitter, ToString
 from BeamlineStatusLogger.sources import Data
 import BeamlineStatusLogger.utils as utils
 import numpy as np
@@ -7,6 +7,36 @@ from datetime import datetime
 import os
 from unittest.mock import Mock
 import pytest
+
+
+class TestToString:
+    def test_to_string(self):
+        data = Data(datetime(2018, 8, 28), 1, metadata={"id": 1234})
+        to_string = ToString()
+        proc_data = to_string(data)
+        assert type(proc_data.value) is str
+        assert proc_data.value == "1"
+
+    def test_to_string_mapping(self):
+        data = Data(
+            datetime(2018, 8, 28), {"a": 1, "b": "foo"}, metadata={"id": 1234})
+        to_string = ToString()
+        proc_data = to_string(data)
+        assert type(proc_data.value["a"]) is str
+        assert type(proc_data.value["b"]) is str
+        assert proc_data.value["a"] == "1"
+        assert proc_data.value["b"] == "foo"
+
+    def test_to_string_failure(self):
+        ex = Exception("An error occured")
+        data = Data(datetime(2018, 8, 28), None, failure=ex,
+                    metadata={"id": 1234})
+        to_string = ToString()
+        proc_data = to_string(data)
+        assert proc_data.timestamp == data.timestamp
+        assert proc_data.value is None
+        assert proc_data.failure is ex
+        assert proc_data.metadata["id"] == 1234
 
 
 class TestPeakFitter:

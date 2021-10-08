@@ -1,4 +1,5 @@
 import BeamlineStatusLogger.utils as utils
+from collections.abc import Mapping
 import functools
 import os
 import numpy as np
@@ -25,6 +26,22 @@ def pass_failures(func):
             return func(*args)
 
     return wrapper
+
+
+def ToString():
+    """
+        A processor that converts all values to strings
+    """
+    @pass_failures
+    def to_string(data):
+        value = data.value
+        if isinstance(value, Mapping):
+            value = {k: str(v) for k, v in value.items()}
+        else:
+            value = str(value)
+        data.value = value
+        return data
+    return to_string
 
 
 class PeakFitter:
