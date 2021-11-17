@@ -1,6 +1,6 @@
 [Unit]
 Description=Log beamline attributes to a database
-Requires=multi-user.target
+After=network.target
 
 [Install]
 WantedBy=multi-user.target
