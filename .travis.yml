@@ -20,6 +20,7 @@ install:
     - sleep 3
 
 script:
+    - docker-compose exec -T tango-test python3 -m pip install -r dev-requirements.txt
     - docker-compose exec -T tango-test python3 -m pip install .
     - docker-compose exec -T tango-test python3 -m flake8
     - docker-compose exec -T tango-test python3 -m pytest --cov=BeamlineStatusLogger --cov-report xml:coverage.xml
