@@ -49,7 +49,7 @@ RUN apt-get update && apt-get install -y \
         quilt \
         adduser \
         git-buildpackage \
-    && pip3 install influxdb
+    && pip3 install influxdb 'imageio<2.10'  # for compatibility with pillow 4.0
 
 
 # more info at https://docs.docker.com/config/containers/multi-service_container/
