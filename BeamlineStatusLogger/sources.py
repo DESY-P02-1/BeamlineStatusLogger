@@ -57,8 +57,6 @@ class TangoDeviceAttributeSource:
         self.attribute_name = attribute_name
         # TODO: Should a possible exception be wrapped?
         self.device = tango.DeviceProxy(device_name)
-        # Test if attribute exists
-        self.device.attribute_query(attribute_name)
         self.metadata = metadata
         if "quality" in self.metadata:
             raise ValueError("The metadata entry 'quality' is reserved for the"
@@ -158,8 +156,6 @@ class TINECameraSource:
             raise tine_import_err
         self.device_address = device_address
         self.property_name = property_name
-        # Test if device and property exists
-        tine.get(self.device_address, self.property_name)
         self.metadata = metadata
         if "status" in self.metadata:
             raise ValueError("The metadata entry 'status' is reserved for the"
