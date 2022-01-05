@@ -3,7 +3,11 @@ from collections.abc import Mapping
 import functools
 import os
 import numpy as np
-import matplotlib.pyplot as plt
+# Work around GTK backend issue with pandas, see
+# https://github.com/pandas-dev/pandas/issues/23040
+import matplotlib
+matplotlib.use("agg")
+import matplotlib.pyplot as plt  # noqa
 
 
 def pass_failures(func):
