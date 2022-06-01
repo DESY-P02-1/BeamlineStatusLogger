@@ -29,8 +29,9 @@ class TestTangoDeviceAttributeSource:
     def test_init_wrong_attribute(self):
         device_name = "sys/tg_test/1"
         attribute_name = "float_scala"
-        with pytest.raises(tango.DevFailed):
-            TangoDeviceAttributeSource(device_name, attribute_name)
+        source = TangoDeviceAttributeSource(device_name, attribute_name)
+        data = source.read()
+        assert data.failure
 
     def test_init_metadata_contains_quality(self):
         device_name = "sys/tg_test/1"
@@ -201,8 +202,9 @@ class TestTINECameraSource:
     def test_init_failure(self):
         device_address = "/CONTEXT/server/other_device"
         property_name = "frame"
-        with pytest.raises(RuntimeError):
-            TINECameraSource(device_address, property_name)
+        source = TINECameraSource(device_address, property_name)
+        data = source.read()
+        assert data.failure
 
     def test_init_metadata_contains_status(self):
         with pytest.raises(ValueError):
