@@ -5,6 +5,7 @@ import configparser
 import glob
 import logging
 import os
+import sys
 import threading
 import BeamlineStatusLogger as bsl
 
@@ -111,7 +112,11 @@ def main():
             config = parse_config_file(file)
             loggers.append(create_Logger(config))
 
-    def shutdown():
+    error_event = threading.Event()
+
+    def shutdown(error=False):
+        if error:
+            error_event.set()
         for logger in loggers:
             logger.abort()
 
@@ -126,13 +131,19 @@ def main():
             logger.run()
         except Exception:
             log.error("Abort due to error:", exc_info=True)
-            shutdown()
+            shutdown(error=True)
 
     threads = []
     for logger in loggers:
         t = threading.Thread(target=run_logger, args=(logger,))
         t.start()
         threads.append(t)
+
+    for t in threads:
+        t.join()
+
+    if error_event.is_set():
+        sys.exit(1)
 
 
 if __name__ == "__main__":
