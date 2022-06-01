@@ -1,3 +1,17 @@
+python3-beamline-status-logger (0.4.0) unknown; urgency=medium
+
+  [ Tim Schoof ]
+  * Remove install dependency on imageio
+  * Fix systemd target cyclic dependency
+  * Work around GTK backend error with pandas
+  * Ignore connection errors for sources at startup
+  * Return non-zero exit status in case of errors
+  * Bump version to 0.4.0
+
+  [ root ]
+
+ -- root <root@6331df9f4eb6>  Wed, 01 Jun 2022 15:46:00 +0000
+
 python3-beamline-status-logger (0.3.0) unknown; urgency=medium
 
   [ Tim Schoof ]
