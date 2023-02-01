@@ -1,4 +1,8 @@
-import PyTango as tango
+try:
+    import PyTango as tango
+except ImportError as err:
+    tango = None
+    tango_import_err = err
 try:
     import PyTine as tine
 except ImportError as err:
@@ -190,3 +194,25 @@ class TINECameraSource:
             timestamp = datetime.now(self.localtz)
             value = None
         return Data(timestamp, value, metadata=metadata)
+
+
+class TINEAttributeSource:
+    def __init__(self, device_address, attr, metadata={}, tz=None):
+        if tine is None:
+            raise tine_import_err
+        self.device_address = device_address
+        self.attr = attr
+        self.metadata = metadata
+        if tz:
+            self.tzlocal = tz
+        else:
+            self.tzlocal = timezone('Europe/Berlin')
+
+    def read(self):
+        attribut = tine.get(self.device_address, self.attr)
+        test = attribut["data"]
+        value = {self.attr: test}
+        failure = None
+        tz = self.tzlocal
+        timestamp = datetime.fromtimestamp(attribut["timestamp"], tz)
+        return Data(timestamp, value, failure, self.metadata.copy())
