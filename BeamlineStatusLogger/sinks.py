@@ -212,7 +212,9 @@ class TextFileSink:
 
     def _format_header(self, fieldnames, metadata):
         header = ""
-        tags = metadata
+        # The quality tag doesn't make sense in the header
+        tags = {
+            key: value for key, value in metadata.items() if key != "quality"}
         tags.update(self.metadata)
         if tags:
             for key, value in tags.items():

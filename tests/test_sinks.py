@@ -290,3 +290,18 @@ class TestTextFileSink:
         data = Data(time, {"foo": 1})
         with pytest.raises(ValueError, match="invalid"):
             text_file_sink.write(data)
+
+    def test_filter_quality_tag_from_header(self, text_file_sink):
+        time = datetime(2018, 8, 15, 17, 37, 39, 660510)
+        data = Data(
+            time, 1,
+            metadata={"attribute": "position", "quality": "ATTR_VALID"})
+        success = text_file_sink.write(data)
+        assert success
+        assert text_file_sink.path.exists()
+        assert text_file_sink.path.read_text() == (
+            "# attribute: position\n"
+            "# id: 1234\n"
+            "timestamp                    	value 	error\n"
+            "2018-08-15T17:37:39.660      	1\n"
+        )
