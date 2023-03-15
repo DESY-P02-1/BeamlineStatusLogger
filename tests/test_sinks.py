@@ -184,7 +184,7 @@ class TestTextFileSink:
         assert text_file_sink.path.read_text() == (
             "# attribute: position\n"
             "# id: 1234\n"
-            "timestamp                    	value 	error\n"
+            "timestamp                    	value       	error\n"
             "2018-08-15T17:37:39.660      	1\n"
         )
 
@@ -198,8 +198,8 @@ class TestTextFileSink:
         assert text_file_sink.path.read_text() == (
             "# attribute: position\n"
             "# id: 1234\n"
-            "timestamp                    	value 	value1	value2	error\n"
-            "2018-08-15T17:37:39.660      	nan	1	2\n"
+            "timestamp                    	value       	value1      	value2      	error\n"
+            "2018-08-15T17:37:39.660      	nan         	1           	2\n"
         )
 
     def test_write_error_first_data_point(self, text_file_sink):
@@ -224,23 +224,23 @@ class TestTextFileSink:
         assert text_file_sink.path.read_text() == (
             "# attribute: position\n"
             "# id: 1234\n"
-            "timestamp                    	value 	error\n"
+            "timestamp                    	value       	error\n"
             "2018-08-15T17:37:39.660      	1\n"
-            "2018-08-15T17:37:39.660      	nan\tRuntimeError\n"
+            "2018-08-15T17:37:39.660      	nan         \tRuntimeError\n"
         )
 
     @pytest.mark.parametrize("value", [None, {"value": None}])
     def test_write_none(self, text_file_sink, value):
         # Write header so that writing a None value succeeds
         text_file_sink.path.write_text(
-            "timestamp                    	value 	error\n")
+            "timestamp                    	value       	error\n")
         time = datetime(2018, 8, 15, 17, 37, 39, 660510)
         data = Data(time, value, metadata={"attribute": "position"})
         success = text_file_sink.write(data)
         assert not success
         assert text_file_sink.path.exists()
         assert text_file_sink.path.read_text() == (
-            "timestamp                    	value 	error\n"
+            "timestamp                    	value       	error\n"
             "2018-08-15T17:37:39.660      	nan\n"
         )
 
@@ -302,6 +302,6 @@ class TestTextFileSink:
         assert text_file_sink.path.read_text() == (
             "# attribute: position\n"
             "# id: 1234\n"
-            "timestamp                    	value 	error\n"
+            "timestamp                    	value       	error\n"
             "2018-08-15T17:37:39.660      	1\n"
         )
