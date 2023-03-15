@@ -1,4 +1,4 @@
-from BeamlineStatusLogger.sinks import InfluxDBSink, filter_nones
+from BeamlineStatusLogger.sinks import InfluxDBSink, TextFileSink, filter_nones
 from BeamlineStatusLogger.sources import Data
 from influxdb import InfluxDBClient
 from datetime import datetime
@@ -149,3 +149,159 @@ class TestInfluxDBSink:
         assert len(rows) == 1
         assert rows[0]["time"] == '2018-08-15T17:37:39.524288Z'
         assert rows[0]["error"] == "msg"
+
+
+@pytest.fixture
+def text_file_sink(tmp_path):
+    filename = tmp_path / "out.dat"
+    return TextFileSink(filename, metadata={"id": 1234})
+
+
+class TestTextFileSink:
+    def test_init_success(self, tmp_path):
+        filename = tmp_path / "out.dat"
+        sink = TextFileSink(filename)
+        assert sink.path == filename
+        assert sink.file is None
+        assert sink.metadata == {}
+
+    def test_init_create_parent_dirs(self, tmp_path):
+        filename = tmp_path / "does_not_exist" / "out.dat"
+        TextFileSink(filename)
+        assert filename.parent.exists()
+
+    def test_init_do_not_create_parent_dirs(self, tmp_path):
+        filename = tmp_path / "does_not_exist" / "out.dat"
+        TextFileSink(filename, create_dirs=False)
+        assert not filename.parent.exists()
+
+    def test_write_number(self, text_file_sink):
+        time = datetime(2018, 8, 15, 17, 37, 39, 660510)
+        data = Data(time, 1, metadata={"attribute": "position"})
+        success = text_file_sink.write(data)
+        assert success
+        assert text_file_sink.path.exists()
+        assert text_file_sink.path.read_text() == (
+            "# attribute: position\n"
+            "# id: 1234\n"
+            "timestamp                    	value       	error\n"
+            "2018-08-15T17:37:39.660      	1\n"
+        )
+
+    def test_write_dict(self, text_file_sink):
+        time = datetime(2018, 8, 15, 17, 37, 39, 660510)
+        data = Data(time, {"value1": 1, "value2": 2, "value": None},
+                    metadata={"attribute": "position"})
+        success = text_file_sink.write(data)
+        assert success
+        assert text_file_sink.path.exists()
+        assert text_file_sink.path.read_text() == (
+            "# attribute: position\n"
+            "# id: 1234\n"
+            "timestamp                    	value       	value1      	value2      	error\n"
+            "2018-08-15T17:37:39.660      	nan         	1           	2\n"
+        )
+
+    def test_write_error_first_data_point(self, text_file_sink):
+        time = datetime(2018, 8, 15, 17, 37, 39, 660510)
+        data = Data(time, None, failure=RuntimeError("msg"),
+                    metadata={"attribute": "position"})
+        success = text_file_sink.write(data)
+        assert not success
+        assert text_file_sink.path.exists()
+        assert text_file_sink.path.read_text() == ""
+
+    def test_write_error_second_data_point(self, text_file_sink):
+        time = datetime(2018, 8, 15, 17, 37, 39, 660510)
+        data = Data(time, 1, metadata={"attribute": "position"})
+        res = text_file_sink.write(data)
+        assert res
+        data = Data(time, None, failure=RuntimeError("msg"),
+                    metadata={"attribute": "position"})
+        res = text_file_sink.write(data)
+        assert not res
+        assert text_file_sink.path.exists()
+        assert text_file_sink.path.read_text() == (
+            "# attribute: position\n"
+            "# id: 1234\n"
+            "timestamp                    	value       	error\n"
+            "2018-08-15T17:37:39.660      	1\n"
+            "2018-08-15T17:37:39.660      	nan         \tRuntimeError\n"
+        )
+
+    @pytest.mark.parametrize("value", [None, {"value": None}])
+    def test_write_none(self, text_file_sink, value):
+        # Write header so that writing a None value succeeds
+        text_file_sink.path.write_text(
+            "timestamp                    	value       	error\n")
+        time = datetime(2018, 8, 15, 17, 37, 39, 660510)
+        data = Data(time, value, metadata={"attribute": "position"})
+        success = text_file_sink.write(data)
+        assert not success
+        assert text_file_sink.path.exists()
+        assert text_file_sink.path.read_text() == (
+            "timestamp                    	value       	error\n"
+            "2018-08-15T17:37:39.660      	nan\n"
+        )
+
+    def test_write_data_points_mismatching_fieldnames(self, text_file_sink):
+        time = datetime(2018, 8, 15, 17, 37, 39, 660510)
+        data = Data(time, {"foo": 1})
+        success = text_file_sink.write(data)
+        assert success
+        time = datetime(2018, 8, 15, 17, 37, 44, 660510)
+        data = Data(time, {"bar": 1})
+        with pytest.raises(ValueError, match="previously unseen"):
+            text_file_sink.write(data)
+
+    def test_write_data_points_mismatching_header(self, text_file_sink):
+        text_file_sink.path.write_text(
+            "timestamp              	foo 	error\n")
+        time = datetime(2018, 8, 15, 17, 37, 44, 660510)
+        data = Data(time, {"bar": 1})
+        with pytest.raises(ValueError, match="previously unseen"):
+            text_file_sink.write(data)
+
+    def test_read_header_from_file(self, text_file_sink):
+        text_file_sink.path.write_text(
+            "# some: 1\n"
+            "# metadata: True\n"
+            "timestamp                    	foo 	error\n"
+            "2018-08-15T17:37:39.660      	1\n")
+        time = datetime(2018, 8, 15, 17, 37, 44, 660510)
+        data = Data(time, None)
+        success = text_file_sink.write(data)
+        assert not success
+        assert text_file_sink.path.read_text() == (
+            "# some: 1\n"
+            "# metadata: True\n"
+            "timestamp                    	foo 	error\n"
+            "2018-08-15T17:37:39.660      	1\n"
+            "2018-08-15T17:37:44.660      	nan\n"
+        )
+
+    def test_read_header_from_file_invalid(self, text_file_sink):
+        text_file_sink.path.write_text(
+            "# some: 1\n"
+            "# metadata: True\n"
+            "foo                          	bar 	error\n"
+            "2018-08-15T17:37:39.660      	1\n")
+        time = datetime(2018, 8, 15, 17, 37, 44, 660510)
+        data = Data(time, {"foo": 1})
+        with pytest.raises(ValueError, match="invalid"):
+            text_file_sink.write(data)
+
+    def test_filter_quality_tag_from_header(self, text_file_sink):
+        time = datetime(2018, 8, 15, 17, 37, 39, 660510)
+        data = Data(
+            time, 1,
+            metadata={"attribute": "position", "quality": "ATTR_VALID"})
+        success = text_file_sink.write(data)
+        assert success
+        assert text_file_sink.path.exists()
+        assert text_file_sink.path.read_text() == (
+            "# attribute: position\n"
+            "# id: 1234\n"
+            "timestamp                    	value       	error\n"
+            "2018-08-15T17:37:39.660      	1\n"
+        )
