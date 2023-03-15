@@ -35,7 +35,7 @@ class InfluxDBSink:
     port : string or int
         InfluxDB port. If not given, the environment variable INFLUXDB_PORT is
         used instead
-    create_db : Booolean
+    create_db : Boolean
         If True, the database is created if it does not already exist
     metadata : mapping
         These entries are appended as the tags to each point
@@ -114,7 +114,7 @@ class TextFileSink:
         (default: "milliseconds")
     value_format : string
         Format used for all values
-    create_dirs : Booolean
+    create_dirs : Boolean
         If True, all parent directories are created if not already existing
         (Default: True)
     metadata : mapping
