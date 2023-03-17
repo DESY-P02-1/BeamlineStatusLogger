@@ -1,0 +1,23 @@
+name: Run Python tests
+
+on: [push]
+
+jobs:
+  test:
+    runs-on: ubuntu-22.04
+
+    steps:
+      - name: Build and start docker container
+        run: |
+          docker-compose build
+          docker-compose up -d
+          sleep 3
+
+      - uses: actions/checkout@v3
+
+      - name: Run tests
+        run: |
+          docker-compose exec -T tango-test python3 -m pip install -r dev-requirements.txt
+          docker-compose exec -T tango-test python3 -m pip install .
+          docker-compose exec -T tango-test python3 -m flake8
+          docker-compose exec -T tango-test python3 -m pytest --cov=BeamlineStatusLogger --cov-report xml:coverage.xml
