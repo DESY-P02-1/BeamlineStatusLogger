@@ -51,7 +51,6 @@ setup(name="BeamlineStatusLogger",
       author_email="tim.schoof@desy.de",
       packages=["BeamlineStatusLogger"],
       install_requires=[
-          "PyTango",  # PyTango takes very long to install by pip
           "influxdb",  # not in Debian stretch
           "scipy",
           "scikit-image",
