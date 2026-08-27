@@ -1,13 +1,10 @@
-import BeamlineStatusLogger.utils as utils
 from collections.abc import Mapping
 import functools
 import os
 import numpy as np
-# Work around GTK backend issue with pandas, see
-# https://github.com/pandas-dev/pandas/issues/23040
-import matplotlib
-matplotlib.use("agg")
 import matplotlib.pyplot as plt  # noqa
+
+import BeamlineStatusLogger.utils as utils
 
 
 def pass_failures(func):
