@@ -403,8 +403,8 @@ def get_peak_parameters(img):
 
     cutoff = sliced_img.max()
 
-    w = roi.major_axis_length
-    h = roi.minor_axis_length
+    w = roi.axis_major_length
+    h = roi.axis_minor_length
 
     p0 = (0, 2*cutoff, bx_width, by_width, w/4, h/4, roi.orientation)
 

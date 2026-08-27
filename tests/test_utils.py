@@ -1,5 +1,8 @@
 import BeamlineStatusLogger.utils as utils
-import imageio
+try:
+    import imageio.v2 as imageio
+except ModuleNotFoundError:
+    import imageio
 import pytest
 from pytest import approx
 from glob import glob
