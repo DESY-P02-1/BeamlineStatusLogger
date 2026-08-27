@@ -62,10 +62,11 @@ class TestTangoDeviceAttributeSource:
                                        metadata={"attribute": attribute_name})
         ex = tango.DevFailed()
 
-        # TODO: How to test handling of tango exceptions?
-        def mockreturn(attribute_name):
-            raise ex
-        monkeypatch.setattr(s.device, 'read_attribute', mockreturn)
+        class MockDevice:
+            def read_attribute(self, name):
+                raise ex
+
+        s.device = MockDevice()
 
         data = s.read()
         now = datetime.datetime.now(timezone("Europe/Berlin"))

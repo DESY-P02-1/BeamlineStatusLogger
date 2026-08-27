@@ -7,6 +7,12 @@ import logging
 import os
 import sys
 import threading
+
+# Work around GTK backend issue with pandas, see
+# https://github.com/pandas-dev/pandas/issues/23040
+import matplotlib
+matplotlib.use("agg")
+
 import BeamlineStatusLogger as bsl
 
 log = logging.getLogger(__name__)

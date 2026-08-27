@@ -1,15 +1,25 @@
-version: '2'
 services:
   influxdb-test:
     image: "influxdb:1.8"
     expose:
       - "8086"
   tango-test:
-    build: ".ci/debian9"
+    build: ".ci/tango-test"
     image: tango-test
+    expose:
+      - "10000"
+  python-test:
+    image: "python:3.11"
     depends_on:
       - influxdb-test
+      - tango-test
     environment:
       - INFLUXDB_HOST=influxdb-test
+      - TANGO_HOST=tango-test:10000
     volumes:
      - .:/code
+    stdin_open: true
+    tty: true
+    working_dir: "/code"
+    command:
+     - bash

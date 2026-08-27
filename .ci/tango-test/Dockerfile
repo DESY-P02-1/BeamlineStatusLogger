@@ -1,4 +1,4 @@
-FROM debian:stretch
+FROM debian:12
 
 # Adapted from reszelaz/sardana-test for installing a minimal tango setup following
 # http://tango-controls.readthedocs.io/en/latest/installation/tango-on-linux.html#debian-ubuntu
@@ -13,14 +13,9 @@ ARG DEBIAN_FRONTEND=noninteractive
 
 # install mysql
 # and workaround for problems with starting mysqld
-RUN apt-get update && apt-get -y install mysql-server \
-    && sed -i 's/\/var\/run\/mysqld\/mysqld.pid/\/tmp\/mysqld.pid/g' \
-            /etc/mysql/mariadb.conf.d/50-server.cnf \
-    && sed -i 's/\/var\/run\/mysqld\/mysqld.sock/\/tmp\/mysqld.sock/g' \
-            /etc/mysql/mariadb.conf.d/50-server.cnf \
-    && mkdir /var/run/mysqld \
-    && ln -s /tmp/mysqld.sock /var/run/mysqld/mysqld.sock \
-    && ln -s /tmp/mysqld.pid /var/run/mysqld/mysqld.pid
+RUN apt-get update && apt-get -y install default-mysql-server \
+    && mkdir -p /var/run/mysqld \
+    && chown mysql /var/run/mysqld
 
 
 # install tango
@@ -30,26 +25,7 @@ RUN echo 'tango-common tango-common/tango-host string tango-test:10000' \
     | debconf-set-selections \
     && apt-get update && apt-get install -y \
         tango-db \
-        tango-test \
-        python3-pytango
-
-
-# Install additional dependencies for package testing
-RUN apt-get update && apt-get install -y \
-        procps \
-        python3-pip \
-        python3-pytest \
-        python3-pytest-cov \
-        python3-pytest-mock \
-        python3-flake8 \
-        python3-scipy \
-        python3-skimage \
-        devscripts \
-        debhelper \
-        quilt \
-        adduser \
-        git-buildpackage \
-    && pip3 install influxdb 'imageio<2.10'  # for compatibility with pillow 4.0
+        tango-test
 
 
 # more info at https://docs.docker.com/config/containers/multi-service_container/
@@ -66,8 +42,8 @@ COPY supervisord.conf /etc/supervisor/conf.d/
 # docker run -it --name tango-test --hostname tango-test debian:stretch /bin/bash
 # apt update
 # apt install dialog
-# apt install mysql-server
-# service mysql start
+# apt install default-mysql-server
+# service mariadb start
 # apt install tango-db # answers: tango-test:1000, yes, test1234, test1234
 # service tango-db start
 # apt install tango-test
@@ -77,10 +53,7 @@ COPY supervisord.conf /etc/supervisor/conf.d/
 # docker container cp tango-test:tango-test-db.tar.gz .
 ADD tango-test-db.tar.gz /
 
-
 ENV TANGO_HOST=tango-test:10000
-
-WORKDIR /code
 
 # start supervisor as deamon
 CMD /usr/bin/supervisord

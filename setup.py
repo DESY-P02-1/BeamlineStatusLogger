@@ -56,6 +56,7 @@ setup(name="BeamlineStatusLogger",
           "scipy",
           "scikit-image",
           "pytz",
+          "matplotlib",
       ],
       zip_safe=False,
       data_files=[
